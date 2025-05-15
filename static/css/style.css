@@ -133,24 +133,9 @@
 }
 
 @media screen and (max-width: 767px) and (-webkit-max-device-pixel-ratio: 1.5) {
-    .banner .slider {
-        animation: none;
-        transform: none;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        position: relative;
-        height: auto;
-        top: auto;
-        left: auto;
-    }
-    
-    .banner .slider .item {
-        position: relative;
-        transform: none !important;
-        margin: 10px;
-        width: 100px;
-        height: 150px;
+    @keyframes autoRun {
+        from { transform: translateX(0); }
+        to { transform: translateX(-100%); }
     }
 }
 
