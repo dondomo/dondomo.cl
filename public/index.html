@@ -71,6 +71,26 @@
             <div class="model"></div>
         </div>
     </div>
+ <script>
+
+document.addEventListener('DOMContentLoaded', function() {
     
+    const testElement = document.createElement('div');
+    testElement.style.transformStyle = 'preserve-3d';
+    const supportsPreserve3D = testElement.style.transformStyle === 'preserve-3d';
+    
+    
+    const isOldiPhone = /iPhone OS (7|8|9)_/.test(navigator.userAgent) || 
+                      (navigator.platform === 'iPhone' && navigator.maxTouchPoints < 5);
+    
+    
+    if (!supportsPreserve3D || isOldiPhone) {
+        document.documentElement.classList.add('no-preserve3d');
+        if (isOldiPhone) {
+            document.documentElement.classList.add('old-iphone');
+        }
+    }
+});
+</script>   
 </body>
 </html>

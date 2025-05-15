@@ -135,67 +135,36 @@
     }
 }
 
-/* DETECCIÓN ESPECÍFICA PARA IPHONE ANTIGUOS */
-@supports not (transform-style: preserve-3d) {
-    .banner .slider {
-        animation: none !important;
-        transform: none !important;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        position: relative;
-        height: auto;
-        top: auto;
-        left: auto;
-        width: 100%;
-        gap: 10px;
-        padding: 20px 0;
-    }
-    
-    .banner .slider .item {
-        position: relative !important;
-        transform: none !important;
-        inset: auto !important;
-        width: 100px !important;
-        height: 150px !important;
-        margin: 0;
-        opacity: 1 !important;
-    }
-    
-    .banner {
-        height: auto;
-        min-height: 100vh;
-    }
+/* FALLBACK PARA DISPOSITIVOS SIN SOPORTE 3D */
+.no-preserve3d .banner .slider,
+.old-iphone .banner .slider {
+    animation: none !important;
+    transform: none !important;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    position: relative;
+    height: auto;
+    top: auto;
+    left: auto;
+    width: 100%;
+    gap: 10px;
+    padding: 20px 0;
 }
 
-/* Fallback adicional para Safari antiguo */
-@media screen and (max-width: 767px) and (-webkit-min-device-pixel-ratio: 0) {
-    @media (max-device-width: 480px) and (orientation: portrait) {
-        @supports (-webkit-touch-callout: none) {
-            .banner .slider {
-                animation: none !important;
-                transform: none !important;
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-                position: relative;
-                height: auto;
-                top: auto;
-                left: auto;
-                width: 100%;
-                gap: 10px;
-                padding: 20px 0;
-            }
-            
-            .banner .slider .item {
-                position: relative !important;
-                transform: none !important;
-                inset: auto !important;
-                width: 100px !important;
-                height: 150px !important;
-                margin: 0;
-                opacity: 1 !important;
-            }
-        }
-    }
+.no-preserve3d .banner .slider .item,
+.old-iphone .banner .slider .item {
+    position: relative !important;
+    transform: none !important;
+    inset: auto !important;
+    width: 100px !important;
+    height: 150px !important;
+    margin: 0;
+    opacity: 1 !important;
+}
+
+.no-preserve3d .banner,
+.old-iphone .banner {
+    height: auto;
+    min-height: 100vh;
 }

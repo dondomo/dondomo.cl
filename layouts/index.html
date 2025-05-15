@@ -70,6 +70,26 @@
             <div class="model"></div>
         </div>
     </div>
+ <script>
+// Detección de soporte 3D y iPhone antiguo
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Verificar soporte de transform-style: preserve-3d
+    const testElement = document.createElement('div');
+    testElement.style.transformStyle = 'preserve-3d';
+    const supportsPreserve3D = testElement.style.transformStyle === 'preserve-3d';
     
+    // 2. Detectar iPhone antiguo (modelos hasta iPhone 6)
+    const isOldiPhone = /iPhone OS (7|8|9)_/.test(navigator.userAgent) || 
+                      (navigator.platform === 'iPhone' && navigator.maxTouchPoints < 5);
+    
+    // 3. Aplicar clases según corresponda
+    if (!supportsPreserve3D || isOldiPhone) {
+        document.documentElement.classList.add('no-preserve3d');
+        if (isOldiPhone) {
+            document.documentElement.classList.add('old-iphone');
+        }
+    }
+});
+</script>   
 </body>
 </html>
