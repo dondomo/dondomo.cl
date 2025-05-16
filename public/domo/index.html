@@ -1,75 +1,86 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Domo 3D Responsive</title>
+    <title>Domo 3D Giratorio</title>
     <style>
         body { 
-            margin: 0;
-            overflow: hidden;
+            margin: 0; 
+            overflow: hidden; 
             background: #000;
         }
-        #container {
-            position: fixed;
-            top: 0;
-            left: 0;
+        #canvas-container {
             width: 100%;
-            height: 100%;
+            height: 100vh;
+            display: block;
         }
     </style>
 </head>
 <body>
+    <div id="canvas-container"></div>
+    
+    
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
    
     <script>
 
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-
-
-const container = document.getElementById('container');
-container.appendChild(renderer.domElement);
-
-
-const radius = 5;
-const detail = 2;
-const geometry = new THREE.IcosahedronGeometry(radius, detail);
-const material = new THREE.MeshBasicMaterial({ 
-    color: 0x00ff00,
-    wireframe: true,
-});
-const dome = new THREE.Mesh(geometry, material);
-scene.add(dome);
-
-
-if (window.innerWidth < 768) {
-    camera.position.z = 7; 
-} else {
-    camera.position.z = 10;
-}
-
-
-function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
+document.addEventListener('DOMContentLoaded', () => {
+    
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(
+        75, 
+        window.innerWidth / window.innerHeight, 
+        0.1, 
+        1000
+    );
+    
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(window.devicePixelRatio); 
     renderer.setSize(window.innerWidth, window.innerHeight);
-}
+    
+    
+    const container = document.getElementById('canvas-container');
+    container.appendChild(renderer.domElement);
 
-window.addEventListener('resize', onWindowResize);
-onWindowResize(); 
+    
+    const radius = 5;
+    const detail = 2;
+    const geometry = new THREE.IcosahedronGeometry(radius, detail);
+    const material = new THREE.MeshBasicMaterial({ 
+        color: 0x00ff00,
+        wireframe: true,
+    });
+    
+    const dome = new THREE.Mesh(geometry, material);
+    scene.add(dome);
 
+    
+    if (window.innerWidth < 768) {
+        camera.position.z = 7;
+    } else {
+        camera.position.z = 10;
+    }
 
-function animate() {
-    requestAnimationFrame(animate);
-    dome.rotation.x += 0.005;
-    dome.rotation.y += 0.01;
-    renderer.render(scene, camera);
-}
+    
+    function handleResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    
+    window.addEventListener('resize', handleResize);
 
-animate();
+    
+    function animate() {
+        requestAnimationFrame(animate);
+        dome.rotation.x += 0.005;
+        dome.rotation.y += 0.01;
+        renderer.render(scene, camera);
+    }
+    
+    animate();
+});
     </script>
 </body>
 </html>
