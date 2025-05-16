@@ -15,33 +15,40 @@ const canvas = document.getElementById('canvas1');
 const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
-let particlesArray = [];
-const numberOfParticles = 20;
-const totalCycleDuration = 10000; // 4 segundos total (3s construcción + 1s desmontaje)
+let particlesArray = []; // Cambiado a let para poder reiniciar
+const numberOfParticles = 10; // Número de partículas
+const cycleDuration = 8000; // 2 segundos
 let lastCycleTime = 0;
 let isDeconstructing = false;
 
+window.addEventListener('resize', function() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+
+const mouse = {
+    x: null,
+    y: null,
+};
+
+canvas.addEventListener('mousemove', function(event) {
+    mouse.x = event.x;
+    mouse.y = event.y;
+});
+
 class Particle {
     constructor() {  
-        this.reset();
-        this.constructionSpeed = 0.01; // Velocidad lenta durante construcción
-        this.deconstructionSpeed = 0.5; // Velocidad rápida durante desmontaje
-    }
-    
-    reset() {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
-        this.targetX = Math.random() * canvas.width; // Posición objetivo
-        this.targetY = Math.random() * canvas.height;
         this.size = Math.random() * 5 + 1;
-        this.originalSize = this.size;
-        this.speedX = Math.random() * 2 - 1; // Velocidad reducida
-        this.speedY = Math.random() * 2 - 1;
+        this.speedX = Math.random() * 3 - 1.5;
+        this.speedY = Math.random() * 3 - 1.5;
         this.setRandomColor();
+        this.originalSize = this.size;
     }
     
     setRandomColor() {
-        const grayType = Math.random();
+        const grayType = Math.random(); // Movido aquí para que cada partícula tenga su propio color
         if (grayType < 0.6) {
             const lightness = Math.floor(Math.random() * 50) + 50;
             this.color = `hsl(0, 0%, ${lightness}%)`;
@@ -57,12 +64,15 @@ class Particle {
 
     update() {
         if (!isDeconstructing) {
-            // Movimiento lento hacia posición objetivo durante construcción
-            this.x += (this.targetX - this.x) * this.constructionSpeed;
-            this.y += (this.targetY - this.y) * this.constructionSpeed;
+            // Comportamiento normal
+            this.x += this.speedX;
+            this.y += this.speedY;
+            
+            if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+            if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
         } else {
-            // Desaparición rápida durante desmontaje
-            this.size = Math.max(0.1, this.size - this.deconstructionSpeed);
+            // Comportamiento de desmontaje
+            this.size = Math.max(0.1, this.size - 0.02); // Reducir el tamaño
         }
     }
     
@@ -81,8 +91,9 @@ function init() {
     }
 }
 
-function handleConnections() {
+function handleParticles() {
     if (!isDeconstructing) {
+        // Solo dibujar conexiones cuando no estamos desmontando
         for (let i = 0; i < particlesArray.length; i++) {
             for (let j = i; j < particlesArray.length; j++) {
                 const dx = particlesArray[i].x - particlesArray[j].x;
@@ -99,33 +110,31 @@ function handleConnections() {
             }
         }
     }
+    
+    for (let i = 0; i < particlesArray.length; i++) {
+        particlesArray[i].update();
+        particlesArray[i].draw();
+    }
 }
 
 function animate(currentTime = 0) {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
+    // Control del ciclo
     if (!lastCycleTime) lastCycleTime = currentTime;
     
-    const elapsed = currentTime - lastCycleTime;
-    const constructionPhaseDuration = totalCycleDuration * 0.75; // 75% para construcción
-    const deconstructionPhaseDuration = totalCycleDuration * 0.25; // 25% para desmontaje
-    
-    if (elapsed > totalCycleDuration) {
+    if (currentTime - lastCycleTime > cycleDuration) {
+        isDeconstructing = !isDeconstructing;
         lastCycleTime = currentTime;
-        isDeconstructing = false;
-        init();
-    } else if (elapsed > constructionPhaseDuration && !isDeconstructing) {
-        isDeconstructing = true;
+        
+        if (!isDeconstructing) {
+            // Reiniciar las partículas
+            init();
+        }
     }
     
-    handleConnections();
-    
-    for (let particle of particlesArray) {
-        particle.update();
-        particle.draw();
-    }
-    
+    handleParticles();
     requestAnimationFrame(animate);
 }
 
