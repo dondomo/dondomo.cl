@@ -2,8 +2,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Domo 3D Giratorio</title>
+    <!-- Viewport optimizado para móviles -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Domo 3D Full Responsive</title>
     <style>
         body { 
             margin: 0; 
@@ -11,7 +12,7 @@
             background: #000;
         }
         #canvas-container {
-            width: 100%;
+            width: 100vw;
             height: 100vh;
             display: block;
         }
@@ -24,61 +25,59 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
    <!-- <script src="script.js"></script> -->
     <script>
-// Asegurarse de que el DOM esté completamente cargado
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Configuración inicial
+    // 1. Escena, cámara y renderizador
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(
-        75, 
-        window.innerWidth / window.innerHeight, 
-        0.1, 
-        1000
-    );
-    
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(window.devicePixelRatio); // Para pantallas Retina
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    
-    // Insertar el renderizador en el contenedor
     const container = document.getElementById('canvas-container');
-    container.appendChild(renderer.domElement);
-
-    // 2. Crear el domo geodésico
-    const radius = 5;
-    const detail = 2;
-    const geometry = new THREE.IcosahedronGeometry(radius, detail);
-    const material = new THREE.MeshBasicMaterial({ 
-        color: 0x00ff00,
-        wireframe: true,
-    });
     
+    // 2. Configurar cámara dinámicamente
+    let camera;
+    function setupCamera() {
+        const aspectRatio = window.innerWidth / window.innerHeight;
+        camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 1000);
+        
+        // Ajustar posición de la cámara para móviles
+        if (window.innerWidth < window.innerHeight) {
+            // Modo vertical (móvil)
+            camera.position.z = 15; // Más lejos para evitar recorte
+        } else {
+            // Modo horizontal (desktop/tablet)
+            camera.position.z = 10;
+        }
+    }
+    
+    // 3. Configurar renderizador y contenedor
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    container.appendChild(renderer.domElement);
+    
+    // 4. Crear domo geodésico
+    const geometry = new THREE.IcosahedronGeometry(5, 2);
+    const material = new THREE.MeshBasicMaterial({ 
+        color: 0x00ff00, 
+        wireframe: true 
+    });
     const dome = new THREE.Mesh(geometry, material);
     scene.add(dome);
-
-    // 3. Posición de la cámara (más cerca en móviles)
-    if (window.innerWidth < 768) {
-        camera.position.z = 7;
-    } else {
-        camera.position.z = 10;
-    }
-
-    // 4. Manejar redimensionamiento
-    function handleResize() {
+    
+    // 5. Manejar redimensionamiento (¡crítico para móviles!)
+    function onWindowResize() {
+        setupCamera(); // Recalcula la cámara
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
     }
+    window.addEventListener('resize', onWindowResize);
+    setupCamera(); // Llamar al inicio
     
-    window.addEventListener('resize', handleResize);
-
-    // 5. Animación
+    // 6. Animación
     function animate() {
         requestAnimationFrame(animate);
         dome.rotation.x += 0.005;
         dome.rotation.y += 0.01;
         renderer.render(scene, camera);
     }
-    
     animate();
 });
     </script>

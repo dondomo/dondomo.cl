@@ -2,8 +2,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Domo 3D Giratorio</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Domo 3D Full Responsive</title>
     <style>
         body { 
             margin: 0; 
@@ -11,7 +12,7 @@
             background: #000;
         }
         #canvas-container {
-            width: 100%;
+            width: 100vw;
             height: 100vh;
             display: block;
         }
@@ -24,53 +25,52 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
    
     <script>
-
 document.addEventListener('DOMContentLoaded', () => {
     
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(
-        75, 
-        window.innerWidth / window.innerHeight, 
-        0.1, 
-        1000
-    );
-    
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(window.devicePixelRatio); 
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    
-    
     const container = document.getElementById('canvas-container');
+    
+    
+    let camera;
+    function setupCamera() {
+        const aspectRatio = window.innerWidth / window.innerHeight;
+        camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 1000);
+        
+        
+        if (window.innerWidth < window.innerHeight) {
+            
+            camera.position.z = 15; 
+        } else {
+            
+            camera.position.z = 10;
+        }
+    }
+    
+    
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
     container.appendChild(renderer.domElement);
-
     
-    const radius = 5;
-    const detail = 2;
-    const geometry = new THREE.IcosahedronGeometry(radius, detail);
+    
+    const geometry = new THREE.IcosahedronGeometry(5, 2);
     const material = new THREE.MeshBasicMaterial({ 
-        color: 0x00ff00,
-        wireframe: true,
+        color: 0x00ff00, 
+        wireframe: true 
     });
-    
     const dome = new THREE.Mesh(geometry, material);
     scene.add(dome);
-
     
-    if (window.innerWidth < 768) {
-        camera.position.z = 7;
-    } else {
-        camera.position.z = 10;
-    }
-
     
-    function handleResize() {
+    function onWindowResize() {
+        setupCamera(); 
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
     }
+    window.addEventListener('resize', onWindowResize);
+    setupCamera(); 
     
-    window.addEventListener('resize', handleResize);
-
     
     function animate() {
         requestAnimationFrame(animate);
@@ -78,7 +78,6 @@ document.addEventListener('DOMContentLoaded', () => {
         dome.rotation.y += 0.01;
         renderer.render(scene, camera);
     }
-    
     animate();
 });
     </script>
