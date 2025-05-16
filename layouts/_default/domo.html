@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domo 3D Giratorio</title>
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background: #000;
+        }
+        canvas { 
+            display: block; 
+        }
+    </style>
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+   <!-- <script src="script.js"></script> -->
+    <script>
+       // 1. Configuración inicial de Three.js
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// 2. Crear el domo (geometría geodésica)
+const radius = 5;
+const detail = 2; // Nivel de subdivisión (más detalle = más triángulos)
+const geometry = new THREE.IcosahedronGeometry(radius, detail);
+
+// Material con estilo "alambre" (wireframe) para ver la estructura
+const material = new THREE.MeshBasicMaterial({ 
+    color: 0x00ff00,
+    wireframe: true,
+});
+
+const dome = new THREE.Mesh(geometry, material);
+scene.add(dome);
+
+// Posición de la cámara
+camera.position.z = 10;
+
+// 3. Animación para girar el domo
+function animate() {
+    requestAnimationFrame(animate);
+    
+    // Rotación en los ejes X e Y
+    dome.rotation.x += 0.005;
+    dome.rotation.y += 0.01;
+    
+    renderer.render(scene, camera);
+}
+
+// Manejar redimensionamiento de la ventana
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// Iniciar animación
+animate();
+    </script>
+</body>
+</html>
