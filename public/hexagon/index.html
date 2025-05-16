@@ -2,40 +2,60 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hexágono Perfecto con Hover</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hexágono Responsivo</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            width: 100vw;
             margin: 0;
             background-color: #111;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+        #canvas-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         canvas {
+            display: block;
             background-color: #000;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
     </style>
 </head>
 <body>
-    <canvas id="hexCanvas" width="600" height="600"></canvas>
+    <div id="canvas-container">
+        <canvas id="hexCanvas"></canvas>
+    </div>
 
     <script>
+        
+        const canvasContainer = document.getElementById('canvas-container');
         const canvas = document.getElementById('hexCanvas');
         const ctx = canvas.getContext('2d');
         
         
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
-        const hexRadius = 80;
-        const buttonDistance = hexRadius * Math.sqrt(3);
-        const hoverScale = 1.15;
+        let canvasSize, hexRadius, buttonDistance;
         
         
         const hexagons = [];
         let hoveredHex = null;
+        const hoverScale = 1.15;
         
         
         class Hexagon {
@@ -48,7 +68,7 @@
                 this.hovered = false;
             }
             
-            draw() {
+            draw(ctx) {
                 const currentRadius = this.hovered ? this.radius * hoverScale : this.radius;
                 
                 ctx.beginPath();
@@ -77,7 +97,7 @@
                         ctx.lineWidth = 2;
                     } else {
                         
-                        this.drawTriangles();
+                        this.drawTriangles(ctx);
                         return;
                     }
                 }
@@ -86,7 +106,7 @@
                 ctx.stroke();
             }
             
-            drawTriangles() {
+            drawTriangles(ctx) {
                 ctx.save();
                 ctx.translate(this.x, this.y);
                 
@@ -150,7 +170,32 @@
         }
         
         
+        function resizeCanvas() {
+            
+            const containerWidth = canvasContainer.clientWidth;
+            const containerHeight = canvasContainer.clientHeight;
+            
+            canvasSize = Math.min(containerWidth, containerHeight) * 0.9;
+            
+            
+            canvas.width = canvasSize;
+            canvas.height = canvasSize;
+            
+            
+            hexRadius = canvasSize / 7;
+            buttonDistance = hexRadius * Math.sqrt(3);
+            
+            
+            initHexagons();
+            drawScene();
+        }
+        
+        
         function initHexagons() {
+            hexagons.length = 0;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
             
             hexagons.push(new Hexagon(centerX, centerY, hexRadius, true));
             
@@ -170,37 +215,40 @@
             
             hexagons.forEach(hex => {
                 if (!hex.active && !hex.hovered) {
-                    hex.draw();
+                    hex.draw(ctx);
                 }
             });
             
             
             hexagons.forEach(hex => {
                 if (!hex.active && hex.hovered) {
-                    hex.draw();
+                    hex.draw(ctx);
                 }
             });
             
             
             hexagons.forEach(hex => {
                 if (hex.active && !hex.hovered) {
-                    hex.draw();
+                    hex.draw(ctx);
                 }
             });
             
             
             hexagons.forEach(hex => {
                 if (hex.active && hex.hovered) {
-                    hex.draw();
+                    hex.draw(ctx);
                 }
             });
         }
         
         
-        function handleMouseMove(event) {
+        function handleInteraction(x, y) {
+            
             const rect = canvas.getBoundingClientRect();
-            const mouseX = event.clientX - rect.left;
-            const mouseY = event.clientY - rect.top;
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const canvasX = (x - rect.left) * scaleX;
+            const canvasY = (y - rect.top) * scaleY;
             
             
             let newHoveredHex = null;
@@ -208,7 +256,7 @@
             
             for (const hex of hexagons) {
                 hex.hovered = false;
-                if (hex.active && hex.contains(mouseX, mouseY)) {
+                if (hex.active && hex.contains(canvasX, canvasY)) {
                     newHoveredHex = hex;
                 }
             }
@@ -216,7 +264,7 @@
             
             if (!newHoveredHex) {
                 for (const hex of hexagons) {
-                    if (!hex.active && hex.contains(mouseX, mouseY)) {
+                    if (!hex.active && hex.contains(canvasX, canvasY)) {
                         newHoveredHex = hex;
                         break;
                     }
@@ -230,18 +278,45 @@
             
             hoveredHex = newHoveredHex;
             drawScene();
+            
+            return newHoveredHex;
         }
         
-        function handleClick(event) {
-            if (hoveredHex) {
-                hoveredHex.active = !hoveredHex.active;
+        function handleTap(event) {
+            event.preventDefault();
+            const touch = event.changedTouches[0];
+            const hex = handleInteraction(touch.clientX, touch.clientY);
+            
+            if (hex) {
+                hex.active = !hex.active;
                 drawScene();
             }
         }
         
+        function handleClick(event) {
+            const hex = handleInteraction(event.clientX, event.clientY);
+            
+            if (hex) {
+                hex.active = !hex.active;
+                drawScene();
+            }
+        }
         
-        canvas.addEventListener('mousemove', handleMouseMove);
+        function handleTouchMove(event) {
+            event.preventDefault();
+            const touch = event.touches[0];
+            handleInteraction(touch.clientX, touch.clientY);
+        }
+        
+        
         canvas.addEventListener('click', handleClick);
+        canvas.addEventListener('touchstart', handleTap);
+        canvas.addEventListener('touchmove', handleTouchMove);
+        canvas.addEventListener('touchend', () => {
+            hexagons.forEach(hex => hex.hovered = false);
+            hoveredHex = null;
+            drawScene();
+        });
         canvas.addEventListener('mouseout', () => {
             hexagons.forEach(hex => hex.hovered = false);
             hoveredHex = null;
@@ -249,8 +324,11 @@
         });
         
         
-        initHexagons();
-        drawScene();
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('orientationchange', resizeCanvas);
+        
+        
+        resizeCanvas();
     </script>
 </body>
 </html>
