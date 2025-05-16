@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hexágono Gris Interactivo</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #111;
+        }
+        canvas {
+            background-color: #000;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="hexCanvas" width="600" height="600"></canvas>
+
+    <script>
+        const canvas = document.getElementById('hexCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Configuración
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const hexRadius = 80;
+        const buttonDistance = hexRadius * Math.sqrt(3);
+        const hoverScale = 1.15;
+        
+        // Estados
+        const hexButtons = [];
+        let hoveredHex = null;
+        let activeHex = null;
+        
+        // Dibujar hexágono dividido en triángulos (inactivo)
+        function drawInactiveHexagon(x, y, radius) {
+            ctx.save();
+            ctx.translate(x, y);
+            
+            // Dibujar los 6 triángulos
+            for (let i = 0; i < 6; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                
+                const angle1 = (i * 2 * Math.PI / 6) - Math.PI / 6;
+                const angle2 = ((i + 1) * 2 * Math.PI / 6) - Math.PI / 6;
+                
+                ctx.lineTo(radius * Math.cos(angle1), radius * Math.sin(angle1));
+                ctx.lineTo(radius * Math.cos(angle2), radius * Math.sin(angle2));
+                ctx.closePath();
+                
+                // Triángulos alternados en gris
+                ctx.fillStyle = i % 2 === 0 ? '#333' : '#444';
+                ctx.fill();
+                
+                // Bordes de los triángulos
+                ctx.strokeStyle = '#555';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+            
+            // Borde exterior del hexágono
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                const angle = (i * 2 * Math.PI / 6) - Math.PI / 6;
+                const xPos = radius * Math.cos(angle);
+                const yPos = radius * Math.sin(angle);
+                
+                if (i === 0) {
+                    ctx.moveTo(xPos, yPos);
+                } else {
+                    ctx.lineTo(xPos, yPos);
+                }
+            }
+            ctx.closePath();
+            ctx.strokeStyle = '#777';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            ctx.restore();
+        }
+        
+        // Dibujar hexágono activo
+        function drawActiveHexagon(x, y, radius, isHovered) {
+            const currentRadius = isHovered ? radius * hoverScale : radius;
+            
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                const angle = (i * 2 * Math.PI / 6) - Math.PI / 6;
+                const xPos = x + currentRadius * Math.cos(angle);
+                const yPos = y + currentRadius * Math.sin(angle);
+                
+                if (i === 0) {
+                    ctx.moveTo(xPos, yPos);
+                } else {
+                    ctx.lineTo(xPos, yPos);
+                }
+            }
+            ctx.closePath();
+            
+            // Relleno gris claro cuando está activo
+            ctx.fillStyle = isHovered ? '#ddd' : '#aaa';
+            ctx.fill();
+            
+            // Borde más marcado
+            ctx.strokeStyle = isHovered ? '#fff' : '#888';
+            ctx.lineWidth = isHovered ? 3 : 2;
+            ctx.stroke();
+        }
+        
+        // Crear los hexágonos circundantes
+        function createHexButtons() {
+            for (let i = 0; i < 6; i++) {
+                const angle = i * 2 * Math.PI / 6;
+                const x = centerX + buttonDistance * Math.cos(angle);
+                const y = centerY + buttonDistance * Math.sin(angle);
+                
+                hexButtons.push({
+                    x, y,
+                    radius: hexRadius,
+                    angleIndex: i,
+                    active: false
+                });
+            }
+        }
+        
+        // Dibujar todos los elementos
+        function drawAll() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Dibujar hexágono central
+            if (activeHex?.x === centerX && activeHex?.y === centerY) {
+                drawActiveHexagon(centerX, centerY, hexRadius, hoveredHex?.x === centerX && hoveredHex?.y === centerY);
+            } else {
+                drawInactiveHexagon(centerX, centerY, hexRadius);
+            }
+            
+            // Dibujar hexágonos circundantes
+            hexButtons.forEach(button => {
+                const isHovered = hoveredHex?.x === button.x && hoveredHex?.y === button.y;
+                if (button.active) {
+                    drawActiveHexagon(button.x, button.y, button.radius, isHovered);
+                } else {
+                    drawInactiveHexagon(button.x, button.y, button.radius);
+                }
+            });
+        }
+        
+        // Verificar si el mouse está sobre un hexágono
+        function checkHexHover(x, y) {
+            // Verificar hexágono central primero
+            if (isPointInHexagon(x, y, centerX, centerY, hexRadius)) {
+                return { x: centerX, y: centerY, radius: hexRadius };
+            }
+            
+            // Verificar hexágonos circundantes
+            for (const button of hexButtons) {
+                if (isPointInHexagon(x, y, button.x, button.y, button.radius)) {
+                    return button;
+                }
+            }
+            return null;
+        }
+        
+        // Función de detección de colisión con hexágono
+        function isPointInHexagon(x, y, hexX, hexY, radius) {
+            const dx = x - hexX;
+            const dy = y - hexY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance > radius * 1.1) return false;
+            
+            let angle = Math.atan2(dy, dx);
+            angle = (angle + Math.PI * 2) % (Math.PI * 2);
+            angle = (angle + Math.PI / 6) % (Math.PI * 2);
+            const sector = Math.floor(angle / (Math.PI / 3));
+            angle = angle % (Math.PI / 3);
+            
+            const maxDistance = radius / Math.cos(Math.PI / 6 - angle);
+            return distance <= maxDistance * 1.1;
+        }
+        
+        // Eventos de mouse
+        canvas.addEventListener('mousemove', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            
+            hoveredHex = checkHexHover(x, y);
+            drawAll();
+        });
+        
+        canvas.addEventListener('mouseout', () => {
+            hoveredHex = null;
+            drawAll();
+        });
+        
+        canvas.addEventListener('click', (event) => {
+            if (hoveredHex) {
+                if (hoveredHex.x === centerX && hoveredHex.y === centerY) {
+                    // Click en hexágono central
+                    activeHex = activeHex?.x === centerX ? null : hoveredHex;
+                } else {
+                    // Click en hexágono circundante
+                    const clickedButton = hexButtons.find(b => b.x === hoveredHex.x && b.y === hoveredHex.y);
+                    if (clickedButton) {
+                        clickedButton.active = !clickedButton.active;
+                    }
+                }
+                drawAll();
+            }
+        });
+        
+        // Inicializar
+        createHexButtons();
+        drawAll();
+    </script>
+</body>
+</html>

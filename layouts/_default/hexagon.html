@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hexágono Perfecto con Hover</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #111;
+        }
+        canvas {
+            background-color: #000;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="hexCanvas" width="600" height="600"></canvas>
+
+    <script>
+        const canvas = document.getElementById('hexCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Configuración
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const hexRadius = 80;
+        const buttonDistance = hexRadius * Math.sqrt(3);
+        const hoverScale = 1.15;
+        
+        // Estados
+        const hexagons = [];
+        let hoveredHex = null;
+        
+        // Clase Hexágono
+        class Hexagon {
+            constructor(x, y, radius, isCentral = false) {
+                this.x = x;
+                this.y = y;
+                this.radius = radius;
+                this.isCentral = isCentral;
+                this.active = false;
+                this.hovered = false;
+            }
+            
+            draw() {
+                const currentRadius = this.hovered ? this.radius * hoverScale : this.radius;
+                
+                ctx.beginPath();
+                for (let i = 0; i < 6; i++) {
+                    const angle = (i * 2 * Math.PI / 6) - Math.PI / 6;
+                    const xPos = this.x + currentRadius * Math.cos(angle);
+                    const yPos = this.y + currentRadius * Math.sin(angle);
+                    
+                    if (i === 0) {
+                        ctx.moveTo(xPos, yPos);
+                    } else {
+                        ctx.lineTo(xPos, yPos);
+                    }
+                }
+                ctx.closePath();
+                
+                // Estilo según estado
+                if (this.active) {
+                    ctx.fillStyle = this.hovered ? '#ddd' : '#aaa';
+                    ctx.strokeStyle = this.hovered ? '#fff' : '#888';
+                    ctx.lineWidth = this.hovered ? 3 : 2;
+                } else {
+                    if (this.hovered) {
+                        ctx.fillStyle = '#555';
+                        ctx.strokeStyle = '#888';
+                        ctx.lineWidth = 2;
+                    } else {
+                        // Dibujar triángulos solo cuando está inactivo y no en hover
+                        this.drawTriangles();
+                        return;
+                    }
+                }
+                
+                ctx.fill();
+                ctx.stroke();
+            }
+            
+            drawTriangles() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                
+                // Dibujar los 6 triángulos
+                for (let i = 0; i < 6; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    
+                    const angle1 = (i * 2 * Math.PI / 6) - Math.PI / 6;
+                    const angle2 = ((i + 1) * 2 * Math.PI / 6) - Math.PI / 6;
+                    
+                    ctx.lineTo(this.radius * Math.cos(angle1), this.radius * Math.sin(angle1));
+                    ctx.lineTo(this.radius * Math.cos(angle2), this.radius * Math.sin(angle2));
+                    ctx.closePath();
+                    
+                    ctx.fillStyle = '#333';
+                    ctx.fill();
+                    
+                    ctx.strokeStyle = '#555';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+                
+                // Borde exterior
+                ctx.beginPath();
+                for (let i = 0; i < 6; i++) {
+                    const angle = (i * 2 * Math.PI / 6) - Math.PI / 6;
+                    const xPos = this.radius * Math.cos(angle);
+                    const yPos = this.radius * Math.sin(angle);
+                    
+                    if (i === 0) {
+                        ctx.moveTo(xPos, yPos);
+                    } else {
+                        ctx.lineTo(xPos, yPos);
+                    }
+                }
+                ctx.closePath();
+                ctx.strokeStyle = '#777';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                ctx.restore();
+            }
+            
+            contains(x, y) {
+                const dx = x - this.x;
+                const dy = y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance > this.radius * (this.hovered ? hoverScale : 1)) return false;
+                
+                let angle = Math.atan2(dy, dx);
+                angle = (angle + Math.PI * 2) % (Math.PI * 2);
+                angle = (angle + Math.PI / 6) % (Math.PI * 2);
+                const sector = Math.floor(angle / (Math.PI / 3));
+                angle = angle % (Math.PI / 3);
+                
+                const maxDistance = this.radius / Math.cos(Math.PI / 6 - angle);
+                return distance <= maxDistance * (this.hovered ? hoverScale : 1);
+            }
+        }
+        
+        // Inicializar hexágonos
+        function initHexagons() {
+            // Hexágono central
+            hexagons.push(new Hexagon(centerX, centerY, hexRadius, true));
+            
+            // Hexágonos circundantes
+            for (let i = 0; i < 6; i++) {
+                const angle = i * 2 * Math.PI / 6;
+                const x = centerX + buttonDistance * Math.cos(angle);
+                const y = centerY + buttonDistance * Math.sin(angle);
+                hexagons.push(new Hexagon(x, y, hexRadius));
+            }
+        }
+        
+        // Dibujar escena completa
+        function drawScene() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 1. Dibujar todos los hexágonos inactivos sin hover primero
+            hexagons.forEach(hex => {
+                if (!hex.active && !hex.hovered) {
+                    hex.draw();
+                }
+            });
+            
+            // 2. Dibujar hexágonos inactivos con hover
+            hexagons.forEach(hex => {
+                if (!hex.active && hex.hovered) {
+                    hex.draw();
+                }
+            });
+            
+            // 3. Dibujar hexágonos activos sin hover
+            hexagons.forEach(hex => {
+                if (hex.active && !hex.hovered) {
+                    hex.draw();
+                }
+            });
+            
+            // 4. Dibujar hexágonos activos con hover (encima de todo)
+            hexagons.forEach(hex => {
+                if (hex.active && hex.hovered) {
+                    hex.draw();
+                }
+            });
+        }
+        
+        // Manejar eventos de mouse
+        function handleMouseMove(event) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+            
+            // Resetear hover actual
+            let newHoveredHex = null;
+            
+            // Verificar hexágonos activos con hover primero
+            for (const hex of hexagons) {
+                hex.hovered = false;
+                if (hex.active && hex.contains(mouseX, mouseY)) {
+                    newHoveredHex = hex;
+                }
+            }
+            
+            // Si no hay hover en activos, verificar inactivos
+            if (!newHoveredHex) {
+                for (const hex of hexagons) {
+                    if (!hex.active && hex.contains(mouseX, mouseY)) {
+                        newHoveredHex = hex;
+                        break;
+                    }
+                }
+            }
+            
+            // Aplicar nuevo hover
+            if (newHoveredHex) {
+                newHoveredHex.hovered = true;
+            }
+            
+            hoveredHex = newHoveredHex;
+            drawScene();
+        }
+        
+        function handleClick(event) {
+            if (hoveredHex) {
+                hoveredHex.active = !hoveredHex.active;
+                drawScene();
+            }
+        }
+        
+        // Configurar eventos
+        canvas.addEventListener('mousemove', handleMouseMove);
+        canvas.addEventListener('click', handleClick);
+        canvas.addEventListener('mouseout', () => {
+            hexagons.forEach(hex => hex.hovered = false);
+            hoveredHex = null;
+            drawScene();
+        });
+        
+        // Iniciar
+        initHexagons();
+        drawScene();
+    </script>
+</body>
+</html>
