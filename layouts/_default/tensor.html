@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tensoestructura con Domo Ajustado</title>
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background-color: #f0f0f0;
+        }
+        canvas { 
+            display: block; 
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            background-color: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">Tensoestructura con Domo Correctamente Posicionado<br>Usa el ratón para rotar la vista</div>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/TextureLoader.js"></script>
+    <script>
+        // Escena, cámara y renderizador
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB);
+        
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 15, 30);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+        
+        // Controles de órbita
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        
+        // Luz
+        const ambientLight = new THREE.AmbientLight(0x404040);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.9);
+        directionalLight.position.set(10, 20, 10);
+        directionalLight.castShadow = true;
+        directionalLight.shadow.mapSize.width = 2048;
+        directionalLight.shadow.mapSize.height = 2048;
+        scene.add(directionalLight);
+        
+        // Suelo
+        const groundGeometry = new THREE.PlaneGeometry(50, 50);
+        const groundMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x3a5f0b, 
+            side: THREE.DoubleSide 
+        });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+        
+        // Cargador de texturas
+        const textureLoader = new THREE.TextureLoader();
+        
+        // Crear estructura con domo semicircular
+        function createTensegrityStructure() {
+            const structure = {
+                pillars: [],
+                cables: [],
+                membrane: null,
+                nodes: []
+            };
+            
+            // Materiales
+            const pillarMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0x666666,
+                shininess: 30
+            });
+            
+            const cableMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0x00aa00,
+                transparent: true,
+                opacity: 0.9
+            });
+            
+            const nodeMaterial = new THREE.MeshPhongMaterial({
+                color: 0xaa0000,
+                shininess: 100
+            });
+            
+            // Parámetros del domo
+            const domeRadius = 10;
+            const domeHeight = 5;
+            const pilarCount = 5;
+            
+            // Crear nodos base (en un círculo)
+            const baseNodes = [];
+            for (let i = 0; i < pilarCount; i++) {
+                const angle = (i / pilarCount) * Math.PI * 2;
+                const x = domeRadius * Math.cos(angle);
+                const z = domeRadius * Math.sin(angle);
+                
+                const nodeGeometry = new THREE.SphereGeometry(0.3, 16, 16);
+                const node = new THREE.Mesh(nodeGeometry, nodeMaterial);
+                node.position.set(x, 0, z); // Y = 0 para que estén en el suelo
+                node.castShadow = true;
+                scene.add(node);
+                baseNodes.push(node);
+                structure.nodes.push(node);
+            }
+            
+            // Crear nodos superiores (en un círculo más pequeño, altura del domo)
+            const topNodes = [];
+            for (let i = 0; i < pilarCount; i++) {
+                const angle = (i / pilarCount) * Math.PI * 2;
+                const x = (domeRadius * 0.6) * Math.cos(angle);
+                const z = (domeRadius * 0.6) * Math.sin(angle);
+                
+                const nodeGeometry = new THREE.SphereGeometry(0.3, 16, 16);
+                const node = new THREE.Mesh(nodeGeometry, nodeMaterial);
+                node.position.set(x, domeHeight, z);
+                node.castShadow = true;
+                scene.add(node);
+                topNodes.push(node);
+                structure.nodes.push(node);
+            }
+            
+            // Crear pilares (inclinados hacia afuera)
+            for (let i = 0; i < pilarCount; i++) {
+                const pillarGeometry = new THREE.CylinderGeometry(0.2, 0.25, 1, 16);
+                const pillar = new THREE.Mesh(pillarGeometry, pillarMaterial);
+                
+                const baseNode = baseNodes[i];
+                const topNode = topNodes[i];
+                
+                const position = new THREE.Vector3();
+                position.addVectors(baseNode.position, topNode.position).multiplyScalar(0.5);
+                
+                pillar.position.copy(position);
+                
+                const direction = new THREE.Vector3();
+                direction.subVectors(topNode.position, baseNode.position);
+                const distance = direction.length();
+                
+                pillar.scale.y = distance;
+                pillar.lookAt(topNode.position);
+                pillar.rotateX(Math.PI / 2);
+                pillar.castShadow = true;
+                
+                scene.add(pillar);
+                structure.pillars.push(pillar);
+            }
+            
+            // Crear cables de tensión
+            for (let i = 0; i < pilarCount; i++) {
+                const nodeA = baseNodes[i];
+                const nodeB = topNodes[(i + 2) % pilarCount];
+                
+                const cableGeometry = new THREE.CylinderGeometry(0.07, 0.07, 1, 8);
+                cableGeometry.translate(0, 0.5, 0);
+                
+                const cable = new THREE.Mesh(cableGeometry, cableMaterial);
+                
+                const position = new THREE.Vector3();
+                position.addVectors(nodeA.position, nodeB.position).multiplyScalar(0.5);
+                
+                cable.position.copy(position);
+                
+                const direction = new THREE.Vector3();
+                direction.subVectors(nodeB.position, nodeA.position);
+                const distance = direction.length();
+                
+                cable.scale.y = distance;
+                cable.lookAt(nodeB.position);
+                cable.rotateX(Math.PI / 2);
+                cable.castShadow = true;
+                
+                scene.add(cable);
+                structure.cables.push(cable);
+            }
+            
+            // Crear domo semiesférico correctamente posicionado
+            createDomeMembrane(topNodes, domeHeight, domeRadius).then(membrane => {
+                structure.membrane = membrane;
+                scene.add(membrane);
+            });
+            
+            return structure;
+        }
+        
+        // Función para crear el domo semiesférico
+        async function createDomeMembrane(anchorPoints, domeHeight, domeRadius) {
+            // Crear geometría del domo (media esfera)
+            const segments = 32;
+            const domeGeometry = new THREE.SphereGeometry(
+                domeRadius * 0.9,  // Radio ligeramente menor que la base
+                segments,
+                segments,
+                0, Math.PI * 2,    // Ángulo phi completo
+                0, Math.PI * 0.5   // Ángulo theta solo la mitad superior
+            );
+            
+            // Ajustar posición para que la base descanse en Y=0
+            domeGeometry.translate(0, domeRadius * 0.9, 0);
+            
+            // Cargar textura
+            const texture = await new Promise((resolve) => {
+                textureLoader.load(
+                    'https://threejs.org/examples/textures/hardwood2_diffuse.jpg', 
+                    (tex) => {
+                        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+                        tex.repeat.set(2, 2);
+                        resolve(tex);
+                    },
+                    undefined, 
+                    (err) => {
+                        console.error('Error al cargar textura:', err);
+                        resolve(null);
+                    }
+                );
+            });
+            
+            const material = new THREE.MeshStandardMaterial({
+                color: 0xf8f8f8,
+                map: texture,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.95,
+                roughness: 0.7,
+                metalness: 0.1
+            });
+            
+            const dome = new THREE.Mesh(domeGeometry, material);
+            dome.castShadow = true;
+            dome.receiveShadow = true;
+            
+            // Ajustar posición para que coincida con los anclajes
+            const center = new THREE.Vector3();
+            anchorPoints.forEach(point => {
+                center.add(point.position);
+            });
+            center.divideScalar(anchorPoints.length);
+            
+            dome.position.copy(center);
+            dome.position.y = 0; // La base del domo ahora está en Y=0
+            
+            return dome;
+        }
+        
+        const tensegrity = createTensegrityStructure();
+        
+        // Animación del domo
+        function animateDome(time) {
+            if (!tensegrity.membrane) return;
+            
+            const dome = tensegrity.membrane;
+            const geometry = dome.geometry;
+            
+            if (!geometry.userData.originalPositions) {
+                geometry.userData.originalPositions = geometry.attributes.position.clone();
+            }
+            
+            const positions = geometry.attributes.position;
+            const originalPositions = geometry.userData.originalPositions;
+            
+            const waveHeight = 0.1;
+            const waveSpeed = 0.003;
+            
+            for (let i = 0; i < positions.count; i++) {
+                const x = originalPositions.getX(i);
+                const y = originalPositions.getY(i);
+                const z = originalPositions.getZ(i);
+                
+                // Solo animar la parte superior, no la base
+                if (y > 1) {
+                    const wave = waveHeight * Math.sin(time * waveSpeed + x * 0.2 + z * 0.2);
+                    positions.setY(i, originalPositions.getY(i) + wave);
+                }
+            }
+            
+            positions.needsUpdate = true;
+            geometry.computeVertexNormals();
+        }
+        
+        // Animación
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            time += 1;
+            animateDome(time);
+            
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        // Redimensionamiento
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        animate();
+    </script>
+</body>
+</html>
