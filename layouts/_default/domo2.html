@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modelo 3D - Domo</title>
+    <title>Modelo 3D con Sombras Suaves</title>
     <style>
         body { 
             margin: 0; 
@@ -43,7 +43,6 @@
         Usa el ratón para rotar | Rueda para zoom | Click derecho para mover
     </div>
 
-    <!-- Importar Three.js desde CDN -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
@@ -52,56 +51,107 @@
         // Variables globales
         let scene, camera, renderer, model, controls;
 
-        // Inicializar la escena
         function init() {
-            // Crear escena
+            // Escena con fondo claro
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x333333);
+            scene.background = new THREE.Color(0xf0f0f0);
+            scene.fog = new THREE.FogExp2(0xf0f0f0, 0.002);
 
-            // Crear cámara
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 0, 5);
+            // Cámara
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 2, 5);
 
-            // Crear renderizador
-            renderer = new THREE.WebGLRenderer({ antialias: true });
+            // Renderizador con sombras suaves
+            renderer = new THREE.WebGLRenderer({ 
+                antialias: true,
+                powerPreference: "high-performance"
+            });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 0.8;
             document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-            // Añadir controles de órbita
+            // Controles
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
-            controls.dampingFactor = 0.05;
+            controls.dampingFactor = 0.1;
+            controls.minDistance = 1;
+            controls.maxDistance = 20;
+            controls.maxPolarAngle = Math.PI * 0.9;
 
-            // Añadir luces
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            // ===== ILUMINACIÓN AVANZADA =====
+            // Luz ambiental suave
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambientLight);
 
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(1, 1, 1);
-            scene.add(directionalLight);
+            // Luz direccional principal con sombras suaves
+            const mainLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            mainLight.position.set(2, 10, 5);
+            mainLight.castShadow = true;
+            
+            // Configuración avanzada de sombras
+            mainLight.shadow.mapSize.width = 2048;
+            mainLight.shadow.mapSize.height = 2048;
+            mainLight.shadow.camera.near = 0.5;
+            mainLight.shadow.camera.far = 50;
+            mainLight.shadow.camera.left = -10;
+            mainLight.shadow.camera.right = 10;
+            mainLight.shadow.camera.top = 10;
+            mainLight.shadow.camera.bottom = -10;
+            mainLight.shadow.bias = -0.001;
+            mainLight.shadow.normalBias = 0.05;
+            mainLight.shadow.radius = 4;
+            
+            scene.add(mainLight);
+
+            // Luz de relleno adicional
+            const fillLight1 = new THREE.DirectionalLight(0xffffff, 0.3);
+            fillLight1.position.set(-5, 3, 2);
+            scene.add(fillLight1);
+
+            const fillLight2 = new THREE.DirectionalLight(0xffffff, 0.2);
+            fillLight2.position.set(0, -5, -2);
+            scene.add(fillLight2);
+
+            // Luz hemisférica para ambiente natural
+            const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.2);
+            hemisphereLight.position.set(0, 10, 0);
+            scene.add(hemisphereLight);
+
+            // Plano para recibir sombras (opcional)
+            const groundGeometry = new THREE.PlaneGeometry(20, 20);
+            const groundMaterial = new THREE.ShadowMaterial({ 
+                color: 0x000000,
+                opacity: 0.2,
+                transparent: true
+            });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.position.y = -0.5;
+            ground.receiveShadow = true;
+            scene.add(ground);
 
             // Cargar modelo
             loadModel();
 
-            // Manejar redimensionamiento
+            // Eventos
             window.addEventListener('resize', onWindowResize);
-
-            // Iniciar animación
             animate();
         }
 
-        // Cargar el modelo 3D
         function loadModel() {
             const loader = new THREE.GLTFLoader();
             
             loader.load(
-                '3d/domo.glb', // Ruta al archivo GLB
-                function (gltf) {
+                '3d/domo.glb',
+                (gltf) => {
                     model = gltf.scene;
                     scene.add(model);
                     
-                    // Ajustar la cámara según el tamaño del modelo
+                    // Ajustar la cámara
                     const box = new THREE.Box3().setFromObject(model);
                     const center = box.getCenter(new THREE.Vector3());
                     const size = box.getSize(new THREE.Vector3());
@@ -110,32 +160,49 @@
                     controls.target.copy(center);
                     controls.update();
                     
-                    // Ocultar mensaje de carga
+                    // Configurar materiales y sombras del modelo
+                    model.traverse((child) => {
+                        if (child.isMesh) {
+                            // Materiales
+                            child.material.side = THREE.DoubleSide;
+                            
+                            // Mejorar la apariencia de materiales estándar
+                            if (child.material instanceof THREE.MeshStandardMaterial) {
+                                child.material.roughness = 0.7;
+                                child.material.metalness = 0.1;
+                            }
+                            
+                            // Sombras
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                            
+                            // Mejorar renderizado
+                            child.material.needsUpdate = true;
+                        }
+                    });
+                    
                     document.getElementById('loading').style.display = 'none';
                 },
                 undefined,
-                function (error) {
+                (error) => {
                     console.error('Error al cargar el modelo:', error);
                     document.getElementById('loading').textContent = 'Error al cargar el modelo';
                 }
             );
         }
 
-        // Animación
         function animate() {
             requestAnimationFrame(animate);
-            controls.update(); // Solo necesario si controls.enableDamping = true
+            controls.update();
             renderer.render(scene, camera);
         }
 
-        // Manejar redimensionamiento de ventana
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        // Iniciar la aplicación
         init();
     </script>
 </body>
