@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modelo 3D con Sombras Suaves</title>
@@ -90,7 +90,7 @@
             
             const mainLight = new THREE.DirectionalLight(0xffffff, 0.8);
             mainLight.position.set(2, 10, 5);
-            mainLight.castShadow = true;
+            mainLight.castShadow = false;
             
             
             mainLight.shadow.mapSize.width = 2048;
