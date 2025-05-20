@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dondomo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #D2D2D2;
+      background-image:
+        repeating-linear-gradient(to right, transparent 0 100px, #25283b22 100px 101px),
+        repeating-linear-gradient(to bottom, transparent 0 100px, #25283b22 100px 101px);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      font-family: sans-serif;
+    }
+
+    body::before {
+      position: absolute;
+      width: min(1400px, 90vw);
+      top: 10%;
+      left: 50%;
+      height: 90%;
+      transform: translateX(-50%);
+      content: '';
+      background-image: url(images/bg.png);
+      background-size: 100%;
+      background-repeat: no-repeat;
+      background-position: top center;
+      pointer-events: none;
+    }
+
+    header {
+      background-color: transparent;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      height: 100px;
+      position: relative;
+      overflow: visible;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+
+    /* Menú Hexagonal */
+    .hex-menu {
+      position: absolute;
+      top: -50px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      transition: all 0.5s ease;
+    }
+
+    .hex-main {
+      width: 120px;
+      height: 140px;
+      background: linear-gradient(135deg, #4a6bff, #2541b2);
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 10;
+    }
+
+    .hex-item {
+      width: 80px;
+      height: 90px;
+      background: linear-gradient(135deg, #ff6b6b, #d32f2f);
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      position: absolute;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 0.8em;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      opacity: 0;
+      z-index: 5;
+      transform-origin: center;
+    }
+
+    .hex-menu:hover {
+      top: 0;
+    }
+
+    .hex-menu:hover .hex-item {
+      opacity: 1;
+    }
+
+    .hex-item:nth-child(2) {
+      transform: translate(-85px, -115px);
+    }
+
+    .hex-item:nth-child(3) {
+      transform: translate(125px, -115px);
+    }
+
+    .hex-item:nth-child(4) {
+      transform: translate(75px, -20px);
+    }
+
+    .hex-item:nth-child(5) {
+      transform: translate(-35px, -20px);
+    }
+
+    .hex-item:hover {
+      background: linear-gradient(135deg, #ff8a8a, #f44336);
+      transform: scale(1.1) translate(var(--tx), var(--ty)) !important;
+      z-index: 15;
+      filter: drop-shadow(0 0 5px rgba(0,0,0,0.3));
+    }
+
+    .hex-item:nth-child(2):hover {
+      --tx: -85px;
+      --ty: -115px;
+    }
+
+    .hex-item:nth-child(3):hover {
+      --tx: 125px;
+      --ty: -115px;
+    }
+
+    .hex-item:nth-child(4):hover {
+      --tx: 75px;
+      --ty: -20px;
+    }
+
+    .hex-item:nth-child(5):hover {
+      --tx: -35px;
+      --ty: -20px;
+    }
+
+    /* Carrusel */
+    .banner {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      margin-top: 50px;
+      height: 70vh;
+    }
+    .slider {
+        display: flex;
+        overflow-x: scroll;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        scrollbar-width: none;
+    }
+
+    .slider::-webkit-scrollbar {
+      display: none;
+    }
+
+    .item {
+      flex: 0 0 100%;
+      scroll-snap-align: start;
+      height: 100%;
+    }
+
+    .item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: white;
+      z-index: 10;
+      width: 100%;
+    }
+
+    h1[data-content="dondomo"] {
+      font-size: 3rem;
+      text-transform: uppercase;
+      letter-spacing: 5px;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    .nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.4);
+  color: white;
+  border: none;
+  font-size: 2rem;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.nav:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.nav.prev {
+  left: 10px;
+}
+
+.nav.next {
+  right: 10px;
+}
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="hex-menu">
+      <div class="hex-main">dondomo</div>
+      <div class="hex-item">quienes somos</div>
+      <div class="hex-item">proyectos</div>
+      <div class="hex-item">catalogos</div>
+      <div class="hex-item">contacto</div>
+    </div>
+  </header>
+
+  <div class="banner">
+    <div class="slider" id="slider">
+      <div class="item"><img src="images/DONDOMO1.webp" alt=""></div>
+      <div class="item"><img src="images/DONDOMO2.webp" alt=""></div>
+      <div class="item"><img src="images/DONDOMO3.webp" alt=""></div>
+      <div class="item"><img src="images/DONDOMO4.webp" alt=""></div>
+      <div class="item"><img src="images/DONDOMO5.webp" alt=""></div>
+      <div class="item"><img src="images/DONDOMO6.webp" alt=""></div>
+      <div class="item"><img src="images/DONDOMO7.webp" alt=""></div>
+      <div class="item"><img src="images/DONDOMO8.webp" alt=""></div>
+      <div class="item"><img src="images/DONDOMO9.webp" alt=""></div>
+      <div class="item"><img src="images/DONDOMO10.webp" alt=""></div>
+    </div>
+
+  <button class="nav prev" id="prev">&#9664;</button>
+  <button class="nav next" id="next">&#9654;</button>
+
+    <div class="content">
+      <h1 data-content="dondomo">open virtual heaven</h1>
+    </div>
+  </div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const slider = document.getElementById('slider');
+  const originalItems = Array.from(slider.children);
+
+  // Clonar las imágenes al final
+  originalItems.forEach(item => {
+    const clone = item.cloneNode(true);
+    slider.appendChild(clone);
+  });
+
+  const totalOriginals = originalItems.length;
+  const items = slider.querySelectorAll('.item');
+  const itemWidth = items[0].offsetWidth;
+  let index = 0;
+  let interval;
+
+  function goToIndex(i, smooth = true) {
+    slider.scrollTo({
+      left: i * itemWidth,
+      behavior: smooth ? 'smooth' : 'auto'
+    });
+  }
+
+  function nextImage() {
+    index++;
+    if (index >= totalOriginals) {
+      // Va a la copia sin transición
+      goToIndex(index, true);
+      // Y luego salta al inicio sin que se note
+      setTimeout(() => {
+        goToIndex(0, false);
+        index = 0;
+      }, 600); // Espera a que termine scroll suave
+    } else {
+      goToIndex(index, true);
+    }
+  }
+
+  function prevImage() {
+    index = (index - 1 + totalOriginals) % totalOriginals;
+    goToIndex(index, true);
+  }
+
+  function startAutoScroll() {
+    interval = setInterval(nextImage, 4000); // cada 4s
+  }
+
+  function stopAutoScroll() {
+    clearInterval(interval);
+  }
+
+  // Botones
+  document.getElementById('next')?.addEventListener('click', () => {
+    stopAutoScroll();
+    nextImage();
+    startAutoScroll();
+  });
+
+  document.getElementById('prev')?.addEventListener('click', () => {
+    stopAutoScroll();
+    prevImage();
+    startAutoScroll();
+  });
+
+  // Iniciar carrusel
+  goToIndex(index, false);
+  startAutoScroll();
+});
+</script>
+
+
+</body>
+</html>
