@@ -17,6 +17,8 @@
     <loc>https://example.org/test3/</loc>
     <lastmod>2025-05-15T21:07:49-03:00</lastmod>
   </url><url>
+    <loc>https://example.org/catalogo/</loc>
+  </url><url>
     <loc>https://example.org/categories/</loc>
   </url><url>
     <loc>https://example.org/tags/</loc>

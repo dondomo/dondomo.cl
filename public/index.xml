@@ -36,5 +36,12 @@
       <guid>https://example.org/test3/</guid>
       <description></description>
     </item>
+    <item>
+      <title>Catalogo</title>
+      <link>https://example.org/catalogo/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://example.org/catalogo/</guid>
+      <description>&lt;p&gt;&lt;strong&gt;Características comunes:&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;p&gt;Estructura: Acero galvanizado (perfil tubular).&lt;br&gt;&#xA;Cubierta: Tela PVC Ferrari 502 (impermeable, UV, M2 &amp;amp; B1).&lt;br&gt;&#xA;Piso: Tela PVC Ferrari 611 (color gris).&lt;br&gt;&#xA;Ventanas: Tela transparente Naizil (protección UV).&lt;br&gt;&#xA;Montaje: Todos incluyen puertas (1 o 2) y sistemas de ventilación.&lt;br&gt;&#xA;Garantía: 5 años para la cubierta.&lt;/p&gt;</description>
+    </item>
   </channel>
 </rss>

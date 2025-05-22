@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparativa de Domos Geodésicos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .table-container {
+            flex: 2;
+            overflow-x: auto;
+        }
+        .image-container {
+            flex: 1;
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+        #modelImage {
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: none;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #5f7b8fb9;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        tr:hover {
+            background-color: #f1f8ff;
+            cursor: pointer;
+        }
+        tr.highlight {
+            background-color: #e3f2fd;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Catalogo modelos dondomo</h1>
+    
+    <p>Los domos geodésicos son estructuras arquitectónicas innovadoras que ofrecen una combinación única de resistencia, eficiencia y estética. Su diseño esférico permite una distribución uniforme de la carga, lo que los hace ideales para diversas aplicaciones, desde viviendas hasta espacios recreativos. En este catálogo, presentamos una comparativa de diferentes modelos de domos geodésicos, destacando sus características y especificaciones técnicas.</p>
+    <h2></h2><p>Características comunes en todos los modelos </p></h2>
+<p>Estructura: Acero galvanizado (perfil tubular).</p>
+<p> Cubierta: Tela PVC Ferrari 502 (impermeable, UV, M2 & B1).</p>
+<p> Piso: Tela PVC Ferrari 611 (color gris).</p>
+<p> Ventanas: Tela transparente Naizil (protección UV).</p>
+<p> Montaje: Todos incluyen puertas (1 o 2) y sistemas de ventilación.</p>
+<p> Garantía: 5 años para la cubierta. </p>
+    
+    <div class="container">
+        <div class="table-container">
+            <table id="comparisonTable">
+                <thead>
+                    <tr>
+                        <th>Modelo</th>
+                        <th>Diámetro (m)</th>
+                        <th>Altura (m)</th>
+                        <th>Superficie (m²)</th>
+                        <th>Peso (kg)</th>
+                        <th>Estructura</th>
+                        <th>Ventanas</th>
+                        <th>Montaje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-image="/images/catalogo/DM-400_F2.webp" onmouseover="highlightRow(this)" onmouseout="unhighlightRow(this)">
+                        <td>DM-400/F2</td>
+                        <td>4</td>
+                        <td>2</td>
+                        <td>11,7</td>
+                        <td>62,4</td>
+                        <td>1/2", 1.06 mm</td>
+                        <td>2 circulares</td>
+                        <td>1-2 pers / 40-70 min</td>
+                    </tr>
+                    <tr data-image="/images/catalogo/DM-500_F2.webp" onmouseover="highlightRow(this)" onmouseout="unhighlightRow(this)">
+                        <td>DM-500/F2</td>
+                        <td>5</td>
+                        <td>2,5</td>
+                        <td>18,4</td>
+                        <td>108</td>
+                        <td>3/4", 1.24 mm</td>
+                        <td>2 circulares</td>
+                        <td>2 pers / 45 min</td>
+                    </tr>
+                    <tr data-image="/images/catalogo/DM-500_F2panoramico.webp" onmouseover="highlightRow(this)" onmouseout="unhighlightRow(this)">
+                        <td>DM-500/F2 Panorámico</td>
+                        <td>5</td>
+                        <td>2,5</td>
+                        <td>18,4</td>
+                        <td>108</td>
+                        <td>3/4", 1.24 mm</td>
+                        <td>1 ventanal</td>
+                        <td>2 pers / 45 min</td>
+                    </tr>
+                    <tr data-image="/images/catalogo/DM-600_F3bajo.webp" onmouseover="highlightRow(this)" onmouseout="unhighlightRow(this)">
+                        <td>DM-600/F3 bajo</td>
+                        <td>6</td>
+                        <td>2,48</td>
+                        <td>27,4</td>
+                        <td>154,5</td>
+                        <td>3/4", 1.24 mm</td>
+                        <td>3 circulares</td>
+                        <td>2 pers / 110 min</td>
+                    </tr>
+                    <tr data-image="/images/catalogo/DM-600_F3panoramico.webp" onmouseover="highlightRow(this)" onmouseout="unhighlightRow(this)">
+                        <td>DM-600/F3 alto</td>
+                        <td>6</td>
+                        <td>3,62</td>
+                        <td>27,4</td>
+                        <td>210</td>
+                        <td>3/4", 1.24 mm</td>
+                        <td>2 circulares</td>
+                        <td>2 pers / 140 min</td>
+                    </tr>
+                    <tr data-image="/images/catalogo/DM-700_F3bajo.webp" onmouseover="highlightRow(this)" onmouseout="unhighlightRow(this)">
+                        <td>DM-700/F3 bajo</td>
+                        <td>7</td>
+                        <td>2,89</td>
+                        <td>37,4</td>
+                        <td>189,5</td>
+                        <td>3/4", 1.24 mm</td>
+                        <td>3 circulares</td>
+                        <td>2 pers / 130 min</td>
+                    </tr>
+                    <tr data-image="/images/catalogo/DM-700_F3panoramico.webp" onmouseover="highlightRow(this)" onmouseout="unhighlightRow(this)">
+                        <td>DM-700/F3 alto</td>
+                        <td>7</td>
+                        <td>4,22</td>
+                        <td>37,4</td>
+                        <td>256,8</td>
+                        <td>3/4", 1.24 mm</td>
+                        <td>3 circulares</td>
+                        <td>2 pers / 140 min</td>
+                    </tr>
+                    <tr data-image="/images/catalogo/DM-900_F4.webp" onmouseover="highlightRow(this)" onmouseout="unhighlightRow(this)">
+                        <td>DM-900/F4</td>
+                        <td>9</td>
+                        <td>4,5</td>
+                        <td>62,6</td>
+                        <td>462</td>
+                        <td>1", 1.44 mm</td>
+                        <td>5 circulares</td>
+                        <td>3 pers / 9 horas</td>
+                    </tr>
+                    <tr data-image="/images/catalogo/DM-1200_F5.webp" onmouseover="highlightRow(this)" onmouseout="unhighlightRow(this)">
+                        <td>DM-1200/F5 bajo</td>
+                        <td>12</td>
+                        <td>5,40</td>
+                        <td>110,67</td>
+                        <td>706</td>
+                        <td>1", 1.44 mm</td>
+                        <td>5 circulares</td>
+                        <td>4 pers / 10 horas</td>
+                    </tr>
+                    <tr data-image="/images/catalogo/DM-1200_F5alto.webp" onmouseover="highlightRow(this)" onmouseout="unhighlightRow(this)">
+                        <td>DM-1200/F5 alto</td>
+                        <td>12</td>
+                        <td>6,66</td>
+                        <td>110,67</td>
+                        <td>847</td>
+                        <td>1", 1.44 mm</td>
+                        <td>5 circulares</td>
+                        <td>4 pers / 12 horas</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="image-container">
+            <img id="modelImage" src="" alt="Imagen del modelo">
+            <p id="imageCaption" style="text-align: center; font-style: italic;"></p>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>DESMONTABLES S.A. - Manuel Antonio Tocornal 1483, Santiago, Chile</p>
+    </div>
+
+    <script>
+        // Función para resaltar la fila
+        function highlightRow(row) {
+            row.classList.add('highlight');
+            
+            // Mostrar la imagen correspondiente
+            const imagePath = row.getAttribute('data-image');
+            const modelName = row.cells[0].textContent;
+            
+            document.getElementById('modelImage').src = imagePath;
+            document.getElementById('modelImage').style.display = 'block';
+            document.getElementById('imageCaption').textContent = modelName;
+        }
+        
+        // Función para quitar el resaltado
+        function unhighlightRow(row) {
+            row.classList.remove('highlight');
+        }
+        
+        // Seleccionar la primera fila por defecto al cargar la página
+        window.onload = function() {
+            const firstRow = document.querySelector('#comparisonTable tbody tr:first-child');
+            highlightRow(firstRow);
+        };
+    </script>
+</body>
+</html>

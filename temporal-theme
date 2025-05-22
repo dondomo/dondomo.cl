@@ -1,0 +1,226 @@
+<!-- layouts/partials/mask-link.html -->
+<a href="{{ .Get \"url\" }}" class="mask-link" data-id="{{ .Get \"label\" }}">
+  <span>{{ .Get \"label\" }}</span>
+</a>
+
+<!-- layouts/partials/text-link.html -->
+<a href="{{ .Get \"url\" }}" class="text-link">{{ .Get \"label\" }}</a>
+
+<!-- layouts/partials/carousel.html -->
+<div class="carousel-wrapper">
+  <div class="carousel-track">
+    {{ range .Params.images }}
+    <div class="carousel-slide">
+      <img src="{{ . }}" alt="">
+    </div>
+    {{ end }}
+  </div>
+  <div class="carousel-indicators">
+    {{ range $index, $_ := .Params.images }}
+    <button class="indicator" data-index="{{ $index }}"></button>
+    {{ end }}
+  </div>
+  <button class="carousel-prev">‹</button>
+  <button class="carousel-next">›</button>
+</div>
+
+<!-- static/js/hover-effects.js -->
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.mask-link').forEach(link => {
+    link.addEventListener('mouseenter', () => link.classList.add('hovered'));
+    link.addEventListener('mouseleave', () => link.classList.remove('hovered'));
+  });
+
+  // Transiciones de página (fade)
+  const wrapper = document.getElementById('smooth-wrapper');
+  wrapper.classList.add('is-animating');
+  setTimeout(() => wrapper.classList.remove('is-animating'), 300);
+
+  document.querySelectorAll('a').forEach(link => {
+    if (link.hostname === window.location.hostname) {
+      link.addEventListener('click', e => {
+        const href = link.getAttribute('href');
+        if (!href.startsWith('#') && !link.hasAttribute('target')) {
+          e.preventDefault();
+          wrapper.classList.add('is-exiting');
+          setTimeout(() => {
+            window.location.href = href;
+          }, 400);
+        }
+      });
+    }
+  });
+
+  // Carrusel con controles, pausa y puntos
+  const track = document.querySelector('.carousel-track');
+  const wrapper = document.querySelector('.carousel-wrapper');
+  const indicators = document.querySelectorAll('.carousel-indicators .indicator');
+  const slides = track ? track.children : [];
+  let index = 0;
+  let autoSlide;
+
+  const updateSlide = () => {
+    if (track) {
+      track.style.transform = `translateX(-${index * 100}%)`;
+      indicators.forEach((btn, i) => {
+        btn.classList.toggle('active', i === index);
+      });
+    }
+  };
+
+  const startAutoSlide = () => {
+    autoSlide = setInterval(() => {
+      index = (index + 1) % slides.length;
+      updateSlide();
+    }, 4000);
+  };
+
+  const stopAutoSlide = () => clearInterval(autoSlide);
+
+  document.querySelector('.carousel-prev')?.addEventListener('click', () => {
+    index = (index - 1 + slides.length) % slides.length;
+    updateSlide();
+  });
+
+  document.querySelector('.carousel-next')?.addEventListener('click', () => {
+    index = (index + 1) % slides.length;
+    updateSlide();
+  });
+
+  indicators.forEach(btn => {
+    btn.addEventListener('click', () => {
+      index = parseInt(btn.dataset.index);
+      updateSlide();
+    });
+  });
+
+  if (wrapper) {
+    wrapper.addEventListener('mouseenter', stopAutoSlide);
+    wrapper.addEventListener('mouseleave', startAutoSlide);
+  }
+
+  updateSlide();
+  startAutoSlide();
+});
+
+<!-- layouts/_default/baseof.html (fragmento) -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  {{ partial "head.html" . }}
+  <script src="/js/hover-effects.js" defer></script>
+</head>
+<body>
+  <div id="smooth-wrapper">
+    {{ block "main" . }}{{ end }}
+  </div>
+</body>
+</html>
+
+<!-- assets/css/custom.css -->
+a.mask-link span {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 0.5s cubic-bezier(1, 0, 0, 1);
+}
+a.mask-link.hovered span {
+  clip-path: inset(0 100% 0 0);
+}
+a.mask-link::before {
+  content: attr(data-id);
+  position: absolute;
+  clip-path: inset(0 0 0 100%);
+  transition: clip-path 0.5s cubic-bezier(1, 0, 0, 1);
+}
+a.mask-link.hovered::before {
+  clip-path: inset(0 0 0 0);
+}
+a.text-link::before {
+  content: "";
+  display: block;
+  height: 1px;
+  background: #eeeef2;
+  width: 100%;
+  transform: scaleX(0);
+  transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  transform-origin: left;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+a.text-link:hover::before {
+  transform: scaleX(1);
+}
+
+#smooth-wrapper {
+  transition: opacity 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+#smooth-wrapper.is-animating,
+#smooth-wrapper.is-exiting {
+  opacity: 0;
+}
+
+/* Carrusel */
+.carousel-wrapper {
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+}
+.carousel-track {
+  display: flex;
+  transition: transform 1s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+.carousel-slide {
+  flex: 0 0 100%;
+}
+.carousel-slide img {
+  width: 100%;
+  display: block;
+}
+.carousel-prev,
+.carousel-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.4);
+  color: #fff;
+  border: none;
+  font-size: 2em;
+  padding: 0.2em 0.5em;
+  cursor: pointer;
+  z-index: 2;
+}
+.carousel-prev {
+  left: 10px;
+}
+.carousel-next {
+  right: 10px;
+}
+.carousel-indicators {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.5em;
+  z-index: 2;
+}
+.carousel-indicators .indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: transform 0.3s ease, background 0.3s ease;
+  transform: scale(1);
+  opacity: 0.7;
+}
+.carousel-indicators .indicator:hover {
+  transform: scale(1.2);
+  opacity: 1;
+}
+.carousel-indicators .indicator.active {
+  background: #fff;
+  transform: scale(1.4);
+  opacity: 1;
+}
