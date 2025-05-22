@@ -1,71 +1,64 @@
 <!DOCTYPE html>
 <html lang="es">
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comparativa de Domos Geodésicos</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
+            padding: 0;
             background-color: #f5f5f5;
         }
-        h1 {
+        h1, h2 {
             color: #2c3e50;
             text-align: center;
         }
-        .p {
-            color: #2c3e50;
-            text-align: justify;
-        }
-        .container {
-            display: flex;
-            gap: 20px;
+        .main-container {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 20px;
+            transition: transform 0.5s ease;
+            transform: translateY(0);
         }
-        .table-container {
-            flex: 2;
-            overflow-x: auto;
+        .model-display {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+            align-items: flex-start;
+            flex-wrap: wrap;
         }
-        .image-container {
+        .image-box {
             flex: 1;
-            position: sticky;
-            top: 20px;
-            height: fit-content;
+            min-width: 300px;
+            max-width: 500px;
         }
         #modelImage {
             width: 100%;
-            max-width: 400px;
             border: 1px solid #ddd;
             border-radius: 4px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: none;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .features-box {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
             background-color: white;
+            border-radius: 4px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
+        .model-selector {
+            margin: 20px 0;
+            text-align: center;
         }
-        th {
-            background-color: #5f7b8fb9;
-            color: white;
-            position: sticky;
-            top: 0;
-        }
-        tr:hover {
-            background-color: #f1f8ff;
+        .model-selector select {
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            background-color: white;
             cursor: pointer;
-        }
-        tr.highlight {
-            background-color: #e3f2fd;
-            font-weight: bold;
         }
         .footer {
             text-align: center;
@@ -75,13 +68,34 @@
         }
 
          
-        .hex-menu {
-            position: absolute;
-            top: -50px;
-            left: 50%;
-            transform: translateX(-50%);
+        .hex-menu-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 250px;  
+            overflow: visible;  
             z-index: 100;
             transition: all 0.5s ease;
+        }
+        .hex-menu {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.5s ease;
+        }
+        .hex-menu-container.collapsed {
+            height: 70px;
+        }
+        .hex-menu-container.collapsed .hex-menu {
+            top: -50px;
+        }
+        .hex-menu-container.collapsed ~ .main-container {
+            transform: translateY(0);
+        }
+        .hex-menu-container:not(.collapsed) ~ .main-container {
+            transform: translateY(200px);  
         }
 
         .hex-main {
@@ -99,7 +113,6 @@
             color: transparent;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s ease;
             position: relative;
             z-index: 10;
         }
@@ -120,93 +133,107 @@
             opacity: 0;
             z-index: 5;
             transform-origin: center;
+            text-align: center;
+            padding: 5px;
+            box-sizing: border-box;
         }
 
-        .hex-menu:hover {
-            top: 0;
-        }
-
-        .hex-menu:hover .hex-item {
+        .hex-menu-container:not(.collapsed) .hex-item {
             opacity: 1;
         }
 
         .hex-item:nth-child(2) {
             transform: translate(-90px, -115px);
         }
-
         .hex-item:nth-child(3) {
             transform: translate(130px, -115px);
         }
-
         .hex-item:nth-child(4) {
-            transform: translate(75px, -20px);
+            transform: translate(75px, 90px);
         }
-
         .hex-item:nth-child(5) {
-            transform: translate(-35px, -20px);
+            transform: translate(-35px, 90px);
         }
-
         .hex-item:hover {
             background: linear-gradient(135deg, #ffffff, #c8bab9);
             transform: scale(1.1) translate(var(--tx), var(--ty)) !important;
             z-index: 15;
             filter: drop-shadow(0 0 5px rgba(0,0,0,0.3));
+            color: #2c3e50;
         }
-
         .hex-item:nth-child(2):hover {
             --tx: -85px;
             --ty: -115px;
         }
-
         .hex-item:nth-child(3):hover {
             --tx: 125px;
             --ty: -115px;
         }
-
         .hex-item:nth-child(4):hover {
             --tx: 75px;
-            --ty: -20px;
+            --ty: 90px;
         }
-
         .hex-item:nth-child(5):hover {
             --tx: -35px;
-            --ty: -20px;
+            --ty: 90px;
         }
 
          
-        .common-features {
-            margin-top: 20px;
-            padding: 15px;
+        .feature-section {
+            margin-bottom: 20px;
+        }
+        .feature-section h3 {
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .feature-item {
+            margin: 10px 0;
+            padding: 10px;
             background-color: #f8f9fa;
             border-radius: 4px;
-            border-left: 4px solid #5f7b8fb9;
-            max-width: 400px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 3px solid #5f7b8fb9;
         }
-
-        .common-features h2 {
+        .feature-title {
+            font-weight: bold;
             color: #2c3e50;
-            margin-top: 0;
-            margin-bottom: 10px;
-            font-size: 1.2em;
         }
-
-        .common-features p {
-            margin: 5px 0;
+        .feature-value {
             color: #555;
-            line-height: 1.4;
+        }
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
         }
 
-        #imageCaption {
-            text-align: center;
-            font-style: italic;
-            margin: 10px 0;
+         
+        .hex-menu-container {
+            height: 70px;
+        }
+        .hex-menu-container:hover {
+            height: 250px;
+        }
+        .hex-menu-container:hover .hex-menu {
+            top: 20px;
+        }
+        .hex-menu-container:hover ~ .main-container {
+            transform: translateY(200px);
+        }
+        .hex-menu-container.collapsed:hover {
+            height: 250px;
+        }
+        .hex-menu-container.collapsed:hover .hex-menu {
+            top: 20px;
+        }
+        .hex-menu-container.collapsed:hover ~ .main-container {
+            transform: translateY(200px);
         }
     </style>
-    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <header>
+    <div class="hex-menu-container collapsed" id="hexMenuContainer">
         <div class="hex-menu">
             <div class="hex-main">dondomo</div>
             <div class="hex-item">quienes somos</div>
@@ -214,145 +241,88 @@
             <div class="hex-item">catalogos</div>
             <div class="hex-item">contacto</div>
         </div>
-    </header>  
-    
+    </div>
     <br>
     <br>
     <br>
+      <br>
     <br>
-    
-    <div class="container">
-        <div class="table-container">
-            <table id="comparisonTable">
-                <thead>
-                    <tr>
-                        <th>Modelo</th>
-                        <th>Diámetro (m)</th>
-                        <th>Altura (m)</th>
-                        <th>Superficie (m²)</th>
-                        <th>Peso (kg)</th>
-                        <th>Estructura</th>
-                        <th>Ventanas</th>
-                        <th>Montaje</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr data-image="/images/catalogo/DM-400_F2.webp" onmouseover="highlightRow(this)" onmouseout="unhighlightRow(this)">
-                        <td>DM-400/F2</td>
-                        <td>4</td>
-                        <td>2</td>
-                        <td>11,7</td>
-                        <td>62,4</td>
-                        <td>1/2", 1.06 mm</td>
-                        <td>2 circulares</td>
-                        <td>1-2 pers / 40-70 min</td>
-                    </tr>
-                    <tr data-image="/images/catalogo/DM-500_F2.webp" onmouseover="highlightRow(this)" onmouseout="unhighlightRow(this)">
-                        <td>DM-500/F2</td>
-                        <td>5</td>
-                        <td>2,5</td>
-                        <td>18,4</td>
-                        <td>108</td>
-                        <td>3/4", 1.24 mm</td>
-                        <td>2 circulares</td>
-                        <td>2 pers / 45 min</td>
-                    </tr>
-                    <tr data-image="/images/catalogo/DM-500_F2panoramico.webp" onmouseover="highlightRow(this)" onmouseout="unhighlightRow(this)">
-                        <td>DM-500/F2 Panorámico</td>
-                        <td>5</td>
-                        <td>2,5</td>
-                        <td>18,4</td>
-                        <td>108</td>
-                        <td>3/4", 1.24 mm</td>
-                        <td>1 ventanal</td>
-                        <td>2 pers / 45 min</td>
-                    </tr>
-                    <tr data-image="/images/catalogo/DM-600_F3bajo.webp" onmouseover="highlightRow(this)" onmouseout="unhighlightRow(this)">
-                        <td>DM-600/F3 bajo</td>
-                        <td>6</td>
-                        <td>2,48</td>
-                        <td>27,4</td>
-                        <td>154,5</td>
-                        <td>3/4", 1.24 mm</td>
-                        <td>3 circulares</td>
-                        <td>2 pers / 110 min</td>
-                    </tr>
-                    <tr data-image="/images/catalogo/DM-600_F3panoramico.webp" onmouseover="highlightRow(this)" onmouseout="unhighlightRow(this)">
-                        <td>DM-600/F3 alto</td>
-                        <td>6</td>
-                        <td>3,62</td>
-                        <td>27,4</td>
-                        <td>210</td>
-                        <td>3/4", 1.24 mm</td>
-                        <td>2 circulares</td>
-                        <td>2 pers / 140 min</td>
-                    </tr>
-                    <tr data-image="/images/catalogo/DM-700_F3bajo.webp" onmouseover="highlightRow(this)" onmouseout="unhighlightRow(this)">
-                        <td>DM-700/F3 bajo</td>
-                        <td>7</td>
-                        <td>2,89</td>
-                        <td>37,4</td>
-                        <td>189,5</td>
-                        <td>3/4", 1.24 mm</td>
-                        <td>3 circulares</td>
-                        <td>2 pers / 130 min</td>
-                    </tr>
-                    <tr data-image="/images/catalogo/DM-700_F3panoramico.webp" onmouseover="highlightRow(this)" onmouseout="unhighlightRow(this)">
-                        <td>DM-700/F3 alto</td>
-                        <td>7</td>
-                        <td>4,22</td>
-                        <td>37,4</td>
-                        <td>256,8</td>
-                        <td>3/4", 1.24 mm</td>
-                        <td>3 circulares</td>
-                        <td>2 pers / 140 min</td>
-                    </tr>
-                    <tr data-image="/images/catalogo/DM-900_F4.webp" onmouseover="highlightRow(this)" onmouseout="unhighlightRow(this)">
-                        <td>DM-900/F4</td>
-                        <td>9</td>
-                        <td>4,5</td>
-                        <td>62,6</td>
-                        <td>462</td>
-                        <td>1", 1.44 mm</td>
-                        <td>5 circulares</td>
-                        <td>3 pers / 9 horas</td>
-                    </tr>
-                    <tr data-image="/images/catalogo/DM-1200_F5.webp" onmouseover="highlightRow(this)" onmouseout="unhighlightRow(this)">
-                        <td>DM-1200/F5 bajo</td>
-                        <td>12</td>
-                        <td>5,40</td>
-                        <td>110,67</td>
-                        <td>706</td>
-                        <td>1", 1.44 mm</td>
-                        <td>5 circulares</td>
-                        <td>4 pers / 10 horas</td>
-                    </tr>
-                    <tr data-image="/images/catalogo/DM-1200_F5alto.webp" onmouseover="highlightRow(this)" onmouseout="unhighlightRow(this)">
-                        <td>DM-1200/F5 alto</td>
-                        <td>12</td>
-                        <td>6,66</td>
-                        <td>110,67</td>
-                        <td>847</td>
-                        <td>1", 1.44 mm</td>
-                        <td>5 circulares</td>
-                        <td>4 pers / 12 horas</td>
-                    </tr>
-                </tbody>
-            </table>
+  
+
+    <div class="main-container">
+        <h1></h1>
+        
+        <div class="model-selector">
+            <select id="modelSelect" onchange="changeModel()">
+                <option value="DM-400_F2">DM-400/F2</option>
+                <option value="DM-500_F2">DM-500/F2</option>
+                <option value="DM-500_F2panoramico">DM-500/F2 Panorámico</option>
+                <option value="DM-600_F3bajo">DM-600/F3 bajo</option>
+                <option value="DM-600_F3panoramico">DM-600/F3 alto</option>
+                <option value="DM-700_F3bajo">DM-700/F3 bajo</option>
+                <option value="DM-700_F3panoramico">DM-700/F3 alto</option>
+                <option value="DM-900_F4">DM-900/F4</option>
+                <option value="DM-1200_F5">DM-1200/F5 bajo</option>
+                <option value="DM-1200_F5alto">DM-1200/F5 alto</option>
+            </select>
         </div>
         
-        <div class="image-container">
-            <img id="modelImage" src="" alt="Imagen del modelo">
-            <p id="imageCaption"></p>
+        <div class="model-display">
+            <div class="image-box">
+                <img id="modelImage" src="/images/catalogo/DM-400_F2.webp" alt="Imagen del modelo">
+                <h2 id="modelName">DM-400/F2</h2>
+            </div>
             
-            <div class="common-features">
-                <h2>Características comunes</h2>
-                <p>Estructura: Acero galvanizado (perfil tubular)</p>
-                <p>Cubierta: Tela PVC Ferrari 502 (impermeable, UV, M2 & B1)</p>
-                <p>Piso: Tela PVC Ferrari 611 (color gris)</p>
-                <p>Ventanas: Tela transparente Naizil (protección UV)</p>
-                <p>Montaje: Todos incluyen puertas (1 o 2) y sistemas de ventilación</p>
-                <p>Garantía: 5 años para la cubierta</p>
+            <div class="features-box">
+                <div class="feature-section">
+                    <h3>Especificaciones Técnicas</h3>
+                    <div class="specs-grid">
+                        <div class="feature-item">
+                            <div class="feature-title">Diámetro:</div>
+                            <div class="feature-value" id="diameterValue">4 m</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-title">Altura:</div>
+                            <div class="feature-value" id="heightValue">2 m</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-title">Superficie:</div>
+                            <div class="feature-value" id="surfaceValue">11,7 m²</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-title">Peso:</div>
+                            <div class="feature-value" id="weightValue">62,4 kg</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="feature-section">
+                    <h3></h3>
+                    <div class="feature-item">
+                        <div class="feature-title">Estructura:</div>
+                        <div class="feature-value" id="structureValue">1/2", 1.06 mm</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-title">Cubierta:</div>
+                        <div class="feature-value">Tela PVC Ferrari 502 (impermeable, UV, M2 & B1)</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-title">Piso:</div>
+                        <div class="feature-value">Tela PVC Ferrari 611 (color gris)</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-title">Ventanas:</div>
+                        <div class="feature-value" id="windowsValue">2 circulares</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-title">Montaje:</div>
+                        <div class="feature-value" id="assemblyValue">1-2 pers / 40-70 min</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-title">Garantía:</div>
+                        <div class="feature-value">5 años para la cubierta</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -363,28 +333,144 @@
 
     <script>
         
-        function highlightRow(row) {
-            row.classList.add('highlight');
-            
-            
-            const imagePath = row.getAttribute('data-image');
-            const modelName = row.cells[0].textContent;
-            
-            document.getElementById('modelImage').src = imagePath;
-            document.getElementById('modelImage').style.display = 'block';
-            document.getElementById('imageCaption').textContent = modelName;
-        }
-        
-        
-        function unhighlightRow(row) {
-            row.classList.remove('highlight');
-        }
-        
-        
-        window.onload = function() {
-            const firstRow = document.querySelector('#comparisonTable tbody tr:first-child');
-            highlightRow(firstRow);
+        const models = {
+            "DM-400_F2": {
+                name: "DM-400/F2",
+                image: "/images/catalogo/DM-400_F2.webp",
+                diameter: "4 m",
+                height: "2 m",
+                surface: "11,7 m²",
+                weight: "62,4 kg",
+                structure: "1/2\", 1.06 mm",
+                windows: "2 circulares",
+                assembly: "1-2 pers / 40-70 min"
+            },
+            "DM-500_F2": {
+                name: "DM-500/F2",
+                image: "/images/catalogo/DM-500_F2.webp",
+                diameter: "5 m",
+                height: "2,5 m",
+                surface: "18,4 m²",
+                weight: "108 kg",
+                structure: "3/4\", 1.24 mm",
+                windows: "2 circulares",
+                assembly: "2 pers / 45 min"
+            },
+            "DM-500_F2panoramico": {
+                name: "DM-500/F2 Panorámico",
+                image: "/images/catalogo/DM-500_F2panoramico.webp",
+                diameter: "5 m",
+                height: "2,5 m",
+                surface: "18,4 m²",
+                weight: "108 kg",
+                structure: "3/4\", 1.24 mm",
+                windows: "1 ventanal",
+                assembly: "2 pers / 45 min"
+            },
+            "DM-600_F3bajo": {
+                name: "DM-600/F3 bajo",
+                image: "/images/catalogo/DM-600_F3bajo.webp",
+                diameter: "6 m",
+                height: "2,48 m",
+                surface: "27,4 m²",
+                weight: "154,5 kg",
+                structure: "3/4\", 1.24 mm",
+                windows: "3 circulares",
+                assembly: "2 pers / 110 min"
+            },
+            "DM-600_F3panoramico": {
+                name: "DM-600/F3 alto",
+                image: "/images/catalogo/DM-600_F3panoramico.webp",
+                diameter: "6 m",
+                height: "3,62 m",
+                surface: "27,4 m²",
+                weight: "210 kg",
+                structure: "3/4\", 1.24 mm",
+                windows: "2 circulares",
+                assembly: "2 pers / 140 min"
+            },
+            "DM-700_F3bajo": {
+                name: "DM-700/F3 bajo",
+                image: "/images/catalogo/DM-700_F3bajo.webp",
+                diameter: "7 m",
+                height: "2,89 m",
+                surface: "37,4 m²",
+                weight: "189,5 kg",
+                structure: "3/4\", 1.24 mm",
+                windows: "3 circulares",
+                assembly: "2 pers / 130 min"
+            },
+            "DM-700_F3panoramico": {
+                name: "DM-700/F3 alto",
+                image: "/images/catalogo/DM-700_F3panoramico.webp",
+                diameter: "7 m",
+                height: "4,22 m",
+                surface: "37,4 m²",
+                weight: "256,8 kg",
+                structure: "3/4\", 1.24 mm",
+                windows: "3 circulares",
+                assembly: "2 pers / 140 min"
+            },
+            "DM-900_F4": {
+                name: "DM-900/F4",
+                image: "/images/catalogo/DM-900_F4.webp",
+                diameter: "9 m",
+                height: "4,5 m",
+                surface: "62,6 m²",
+                weight: "462 kg",
+                structure: "1\", 1.44 mm",
+                windows: "5 circulares",
+                assembly: "3 pers / 9 horas"
+            },
+            "DM-1200_F5": {
+                name: "DM-1200/F5 bajo",
+                image: "/images/catalogo/DM-1200_F5.webp",
+                diameter: "12 m",
+                height: "5,40 m",
+                surface: "110,67 m²",
+                weight: "706 kg",
+                structure: "1\", 1.44 mm",
+                windows: "5 circulares",
+                assembly: "4 pers / 10 horas"
+            },
+            "DM-1200_F5alto": {
+                name: "DM-1200/F5 alto",
+                image: "/images/catalogo/DM-1200_F5alto.webp",
+                diameter: "12 m",
+                height: "6,66 m",
+                surface: "110,67 m²",
+                weight: "847 kg",
+                structure: "1\", 1.44 mm",
+                windows: "5 circulares",
+                assembly: "4 pers / 12 horas"
+            }
         };
+
+        
+        function changeModel() {
+            const select = document.getElementById('modelSelect');
+            const modelId = select.value;
+            const model = models[modelId];
+            
+            
+            document.getElementById('modelImage').src = model.image;
+            document.getElementById('modelName').textContent = model.name;
+            
+            
+            document.getElementById('diameterValue').textContent = model.diameter;
+            document.getElementById('heightValue').textContent = model.height;
+            document.getElementById('surfaceValue').textContent = model.surface;
+            document.getElementById('weightValue').textContent = model.weight;
+            document.getElementById('structureValue').textContent = model.structure;
+            document.getElementById('windowsValue').textContent = model.windows;
+            document.getElementById('assemblyValue').textContent = model.assembly;
+        }
+
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            changeModel();
+        });
     </script>
 </body>
 </html>

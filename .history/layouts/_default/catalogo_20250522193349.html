@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparativa de Domos Geodésicos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            transition: margin-top 0.5s ease;
+        }
+        body.menu-open {
+            margin-top: 100px;
+        }
+        h1, h2 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .model-display {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+        .image-box {
+            flex: 1;
+            min-width: 300px;
+            max-width: 500px;
+        }
+        #modelImage {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .features-box {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .model-selector {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .model-selector select {
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            background-color: white;
+            cursor: pointer;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        /* Menú Hexagonal */
+        .hex-menu {
+            position: fixed;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            transition: all 0.5s ease;
+        }
+        .hex-menu.open {
+            top: 20px;
+        }
+        .hex-main {
+            width: 120px;
+            height: 140px;
+            background-color: transparent;
+            background-image: url('/images/logp300x300.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: transparent;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 10;
+        }
+        .hex-item {
+            width: 80px;
+            height: 90px;
+            background: linear-gradient(135deg, #8ce7eaa3, #bbb5ce);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            z-index: 5;
+            transform-origin: center;
+        }
+        .hex-menu:hover .hex-item {
+            opacity: 1;
+        }
+        .hex-item:nth-child(2) {
+            transform: translate(-90px, -115px);
+        }
+        .hex-item:nth-child(3) {
+            transform: translate(130px, -115px);
+        }
+        .hex-item:nth-child(4) {
+            transform: translate(75px, -20px);
+        }
+        .hex-item:nth-child(5) {
+            transform: translate(-35px, -20px);
+        }
+        .hex-item:hover {
+            background: linear-gradient(135deg, #ffffff, #c8bab9);
+            transform: scale(1.1) translate(var(--tx), var(--ty)) !important;
+            z-index: 15;
+            filter: drop-shadow(0 0 5px rgba(0,0,0,0.3));
+        }
+        .hex-item:nth-child(2):hover {
+            --tx: -85px;
+            --ty: -115px;
+        }
+        .hex-item:nth-child(3):hover {
+            --tx: 125px;
+            --ty: -115px;
+        }
+        .hex-item:nth-child(4):hover {
+            --tx: 75px;
+            --ty: -20px;
+        }
+        .hex-item:nth-child(5):hover {
+            --tx: -35px;
+            --ty: -20px;
+        }
+
+        /* Estilos para características */
+        .feature-section {
+            margin-bottom: 20px;
+        }
+        .feature-section h3 {
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .feature-item {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border-left: 3px solid #5f7b8fb9;
+        }
+        .feature-title {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .feature-value {
+            color: #555;
+        }
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="hex-menu" id="hexMenu">
+            <div class="hex-main" onclick="toggleMenu()">dondomo</div>
+            <div class="hex-item">quienes somos</div>
+            <div class="hex-item">proyectos</div>
+            <div class="hex-item">catalogos</div>
+            <div class="hex-item">contacto</div>
+        </div>
+    </header>  
+    M
+    <div class="main-container">
+        <h1>Catálogo de Domos Geodésicos</h1>
+        
+        <div class="model-selector">
+            <select id="modelSelect" onchange="changeModel()">
+                <option value="DM-400_F2">DM-400/F2</option>
+                <option value="DM-500_F2">DM-500/F2</option>
+                <option value="DM-500_F2panoramico">DM-500/F2 Panorámico</option>
+                <option value="DM-600_F3bajo">DM-600/F3 bajo</option>
+                <option value="DM-600_F3panoramico">DM-600/F3 alto</option>
+                <option value="DM-700_F3bajo">DM-700/F3 bajo</option>
+                <option value="DM-700_F3panoramico">DM-700/F3 alto</option>
+                <option value="DM-900_F4">DM-900/F4</option>
+                <option value="DM-1200_F5">DM-1200/F5 bajo</option>
+                <option value="DM-1200_F5alto">DM-1200/F5 alto</option>
+            </select>
+        </div>
+        
+        <div class="model-display">
+            <div class="image-box">
+                <img id="modelImage" src="/images/catalogo/DM-400_F2.webp" alt="Imagen del modelo">
+                <h2 id="modelName">DM-400/F2</h2>
+            </div>
+            
+            <div class="features-box">
+                <div class="feature-section">
+                    <h3>Especificaciones Técnicas</h3>
+                    <div class="specs-grid">
+                        <div class="feature-item">
+                            <div class="feature-title">Diámetro:</div>
+                            <div class="feature-value" id="diameterValue">4 m</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-title">Altura:</div>
+                            <div class="feature-value" id="heightValue">2 m</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-title">Superficie:</div>
+                            <div class="feature-value" id="surfaceValue">11,7 m²</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-title">Peso:</div>
+                            <div class="feature-value" id="weightValue">62,4 kg</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="feature-section">
+                    <h3>Características Comunes</h3>
+                    <div class="feature-item">
+                        <div class="feature-title">Estructura:</div>
+                        <div class="feature-value" id="structureValue">1/2", 1.06 mm</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-title">Cubierta:</div>
+                        <div class="feature-value">Tela PVC Ferrari 502 (impermeable, UV, M2 & B1)</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-title">Piso:</div>
+                        <div class="feature-value">Tela PVC Ferrari 611 (color gris)</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-title">Ventanas:</div>
+                        <div class="feature-value" id="windowsValue">2 circulares</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-title">Montaje:</div>
+                        <div class="feature-value" id="assemblyValue">1-2 pers / 40-70 min</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-title">Garantía:</div>
+                        <div class="feature-value">5 años para la cubierta</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>DESMONTABLES S.A. - Manuel Antonio Tocornal 1483, Santiago, Chile</p>
+    </div>
+
+    <script>
+        // Datos de los modelos
+        const models = {
+            "DM-400_F2": {
+                name: "DM-400/F2",
+                image: "/images/catalogo/DM-400_F2.webp",
+                diameter: "4 m",
+                height: "2 m",
+                surface: "11,7 m²",
+                weight: "62,4 kg",
+                structure: "1/2\", 1.06 mm",
+                windows: "2 circulares",
+                assembly: "1-2 pers / 40-70 min"
+            },
+            "DM-500_F2": {
+                name: "DM-500/F2",
+                image: "/images/catalogo/DM-500_F2.webp",
+                diameter: "5 m",
+                height: "2,5 m",
+                surface: "18,4 m²",
+                weight: "108 kg",
+                structure: "3/4\", 1.24 mm",
+                windows: "2 circulares",
+                assembly: "2 pers / 45 min"
+            },
+            "DM-500_F2panoramico": {
+                name: "DM-500/F2 Panorámico",
+                image: "/images/catalogo/DM-500_F2panoramico.webp",
+                diameter: "5 m",
+                height: "2,5 m",
+                surface: "18,4 m²",
+                weight: "108 kg",
+                structure: "3/4\", 1.24 mm",
+                windows: "1 ventanal",
+                assembly: "2 pers / 45 min"
+            },
+            "DM-600_F3bajo": {
+                name: "DM-600/F3 bajo",
+                image: "/images/catalogo/DM-600_F3bajo.webp",
+                diameter: "6 m",
+                height: "2,48 m",
+                surface: "27,4 m²",
+                weight: "154,5 kg",
+                structure: "3/4\", 1.24 mm",
+                windows: "3 circulares",
+                assembly: "2 pers / 110 min"
+            },
+            "DM-600_F3panoramico": {
+                name: "DM-600/F3 alto",
+                image: "/images/catalogo/DM-600_F3panoramico.webp",
+                diameter: "6 m",
+                height: "3,62 m",
+                surface: "27,4 m²",
+                weight: "210 kg",
+                structure: "3/4\", 1.24 mm",
+                windows: "2 circulares",
+                assembly: "2 pers / 140 min"
+            },
+            "DM-700_F3bajo": {
+                name: "DM-700/F3 bajo",
+                image: "/images/catalogo/DM-700_F3bajo.webp",
+                diameter: "7 m",
+                height: "2,89 m",
+                surface: "37,4 m²",
+                weight: "189,5 kg",
+                structure: "3/4\", 1.24 mm",
+                windows: "3 circulares",
+                assembly: "2 pers / 130 min"
+            },
+            "DM-700_F3panoramico": {
+                name: "DM-700/F3 alto",
+                image: "/images/catalogo/DM-700_F3panoramico.webp",
+                diameter: "7 m",
+                height: "4,22 m",
+                surface: "37,4 m²",
+                weight: "256,8 kg",
+                structure: "3/4\", 1.24 mm",
+                windows: "3 circulares",
+                assembly: "2 pers / 140 min"
+            },
+            "DM-900_F4": {
+                name: "DM-900/F4",
+                image: "/images/catalogo/DM-900_F4.webp",
+                diameter: "9 m",
+                height: "4,5 m",
+                surface: "62,6 m²",
+                weight: "462 kg",
+                structure: "1\", 1.44 mm",
+                windows: "5 circulares",
+                assembly: "3 pers / 9 horas"
+            },
+            "DM-1200_F5": {
+                name: "DM-1200/F5 bajo",
+                image: "/images/catalogo/DM-1200_F5.webp",
+                diameter: "12 m",
+                height: "5,40 m",
+                surface: "110,67 m²",
+                weight: "706 kg",
+                structure: "1\", 1.44 mm",
+                windows: "5 circulares",
+                assembly: "4 pers / 10 horas"
+            },
+            "DM-1200_F5alto": {
+                name: "DM-1200/F5 alto",
+                image: "/images/catalogo/DM-1200_F5alto.webp",
+                diameter: "12 m",
+                height: "6,66 m",
+                surface: "110,67 m²",
+                weight: "847 kg",
+                structure: "1\", 1.44 mm",
+                windows: "5 circulares",
+                assembly: "4 pers / 12 horas"
+            }
+        };
+
+        // Función para cambiar el modelo mostrado
+        function changeModel() {
+            const select = document.getElementById('modelSelect');
+            const modelId = select.value;
+            const model = models[modelId];
+            
+            // Actualizar la imagen y nombre
+            document.getElementById('modelImage').src = model.image;
+            document.getElementById('modelName').textContent = model.name;
+            
+            // Actualizar características específicas
+            document.getElementById('diameterValue').textContent = model.diameter;
+            document.getElementById('heightValue').textContent = model.height;
+            document.getElementById('surfaceValue').textContent = model.surface;
+            document.getElementById('weightValue').textContent = model.weight;
+            document.getElementById('structureValue').textContent = model.structure;
+            document.getElementById('windowsValue').textContent = model.windows;
+            document.getElementById('assemblyValue').textContent = model.assembly;
+        }
+
+        // Función para alternar el menú
+        function toggleMenu() {
+            const hexMenu = document.getElementById('hexMenu');
+            const body = document.body;
+            
+            hexMenu.classList.toggle('open');
+            body.classList.toggle('menu-open');
+        }
+
+        // Inicializar el menú
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cerrar menú si se hace clic fuera de él
+            document.addEventListener('click', function(e) {
+                const hexMenu = document.getElementById('hexMenu');
+                if (!hexMenu.contains(e.target) && e.target.className !== 'hex-main') {
+                    hexMenu.classList.remove('open');
+                    document.body.classList.remove('menu-open');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

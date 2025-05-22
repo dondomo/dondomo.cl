@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparativa de Domos Geodésicos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            transition: transform 0.5s ease;
+            transform: translateY(0);
+        }
+        /* ... (otros estilos se mantienen igual) ... */
+
+        /* Menú Hexagonal - Versión Corregida */
+        .hex-menu-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 170px; /* Altura aumentada para contener todos los hexágonos */
+            overflow: hidden;
+            z-index: 100;
+            transition: all 0.5s ease;
+        }
+        .hex-menu {
+            position: absolute;
+            top: 20px; /* Posición inicial más abajo */
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.5s ease;
+        }
+        .hex-menu-container.collapsed {
+            height: 70px; /* Altura cuando está colapsado */
+        }
+        .hex-menu-container.collapsed .hex-menu {
+            top: -50px; /* Posición cuando está colapsado */
+        }
+        .hex-menu-container.collapsed ~ .main-container {
+            transform: translateY(0);
+        }
+        .hex-menu-container:not(.collapsed) ~ .main-container {
+            transform: translateY(170px); /* Desplazamiento proporcional a la altura del contenedor */
+        }
+
+        .hex-main {
+            width: 120px;
+            height: 140px;
+            background-color: transparent;
+            background-image: url('/images/logp300x300.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: transparent;
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+            z-index: 10;
+        }
+
+        .hex-item {
+            width: 80px;
+            height: 90px;
+            background: linear-gradient(135deg, #8ce7eaa3, #bbb5ce);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            z-index: 5;
+            transform-origin: center;
+        }
+
+        .hex-menu-container:not(.collapsed) .hex-item {
+            opacity: 1;
+        }
+
+        /* Posiciones de los hexágonos inferiores ajustadas */
+        .hex-item:nth-child(4) {
+            transform: translate(75px, 90px); /* Ajustada posición Y */
+        }
+        .hex-item:nth-child(5) {
+            transform: translate(-35px, 90px); /* Ajustada posición Y */
+        }
+        /* ... (otros estilos de hexágonos se mantienen igual) ... */
+    </style>
+</head>
+<body>
+    <div class="hex-menu-container collapsed" id="hexMenuContainer">
+        <div class="hex-menu">
+            <div class="hex-main" onclick="toggleMenu()">dondomo</div>
+            <div class="hex-item">quienes somos</div>
+            <div class="hex-item">proyectos</div>
+            <div class="hex-item">catalogos</div>
+            <div class="hex-item">contacto</div>
+        </div>
+    </div>
+    
+    <!-- Resto del contenido se mantiene igual -->
+    
+    <script>
+        // Función para alternar el menú
+        function toggleMenu() {
+            const container = document.getElementById('hexMenuContainer');
+            container.classList.toggle('collapsed');
+        }
+
+        // Cerrar menú al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            const container = document.getElementById('hexMenuContainer');
+            const hexMenu = document.querySelector('.hex-menu');
+            
+            if (!hexMenu.contains(e.target) && e.target.className !== 'hex-main') {
+                container.classList.add('collapsed');
+            }
+        });
+
+        // ... (resto del JavaScript se mantiene igual)
+    </script>
+</body>
+</html>
