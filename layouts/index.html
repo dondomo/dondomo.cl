@@ -3,11 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>Desmontables</title>
+    <title>cielo.ovh</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #D2D2D2;
+            
+        /* Menú Hexagonal - Versión Corregida */
+        .hex-menu-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 250px; /* Aumentado para mostrar hexágonos inferiores */
+            overflow: visible; /* Cambiado de hidden a visible */
+            z-index: 100;
+            transition: all 0.5s ease;
+        }
+        .hex-menu {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.5s ease;
+        }
+        .hex-menu-container.collapsed {
+            height: 70px;
+        }
+        .hex-menu-container.collapsed .hex-menu {
+            top: -50px;
+        }
+        .hex-menu-container.collapsed ~ .main-container {
+            transform: translateY(0);
+        }
+        .hex-menu-container:not(.collapsed) ~ .main-container {
+            transform: translateY(200px); /* Aumentado para espacio adicional */
+        }
+
+        .hex-main {
+            width: 120px;
+            height: 140px;
+            background-color: transparent;
+            background-image: url('/images/logp300x300.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: transparent;
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+            z-index: 10;
+        }
+
+        .hex-item {
+            width: 80px;
+            height: 90px;
+            background: linear-gradient(135deg, #8ce7eaa3, #bbb5ce);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            z-index: 5;
+            transform-origin: center;
+            text-align: center;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
+        .hex-menu-container:not(.collapsed) .hex-item {
+            opacity: 1;
+        }
+
+        .hex-item:nth-child(2) {
+            transform: translate(-90px, -115px);
+        }
+        .hex-item:nth-child(3) {
+            transform: translate(130px, -115px);
+        }
+        .hex-item:nth-child(4) {
+            transform: translate(75px, 90px);
+        }
+        .hex-item:nth-child(5) {
+            transform: translate(-35px, 90px);
+        }
+        .hex-item:hover {
+            background: linear-gradient(135deg, #ffffff, #c8bab9);
+            transform: scale(1.1) translate(var(--tx), var(--ty)) !important;
+            z-index: 15;
+            filter: drop-shadow(0 0 5px rgba(0,0,0,0.3));
+            color: #2c3e50;
+        }
+        .hex-item:nth-child(2):hover {
+            --tx: -85px;
+            --ty: -115px;
+        }
+        .hex-item:nth-child(3):hover {
+            --tx: 125px;
+            --ty: -115px;
+        }
+        .hex-item:nth-child(4):hover {
+            --tx: 75px;
+            --ty: 90px;
+        }
+        .hex-item:nth-child(5):hover {
+            --tx: -35px;
+            --ty: 90px;
+        }
+
+        /* Estilos para características */
+        .feature-section {
+            margin-bottom: 20px;
+        }
+        .feature-section h3 {
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .feature-item {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border-left: 3px solid #5f7b8fb9;
+        }
+        .feature-title {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .feature-value {
+            color: #555;
+        }
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        /* Nuevos estilos para activación por hover */
+        .hex-menu-container {
+            height: 70px;
+        }
+        .hex-menu-container:hover {
+            height: 250px;
+        }
+        .hex-menu-container:hover .hex-menu {
+            top: 20px;
+        }
+        .hex-menu-container:hover ~ .main-container {
+            transform: translateY(200px);
+        }
+        .hex-menu-container.collapsed:hover {
+            height: 250px;
+        }
+        .hex-menu-container.collapsed:hover .hex-menu {
+            top: 20px;
+        }
+        .hex-menu-container.collapsed:hover ~ .main-container {
+            transform: translateY(200px);
+        }
+    </style>
 <body>
-    <h1>Desmontables</h1> 
+      <div class="hex-menu-container collapsed" id="hexMenuContainer">
+        <div class="hex-menu">
+            <div class="hex-main">-_-</div>
+        </div>
+    </div>  
     <canvas id="canvas1"></canvas> 
 
 <script>
