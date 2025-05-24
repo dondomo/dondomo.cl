@@ -290,6 +290,20 @@
             cursor: pointer;
             display: none;  
         }
+             
+        #mobile-audio-permission {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 15px;
+            font-size: 14px;
+            display: none;
+        }
     </style>
 <body>
           <div id="cat-computer-container">
@@ -312,10 +326,14 @@
         <div id="running-rabbit"></div>
     </div>
 
-        <audio id="radio-player" preload="none"></audio>
+        
+    <audio id="radio-player" crossorigin="anonymous"></audio>
     
     
     <button id="mute-button">🔇</button>
+    
+    
+    <button id="mobile-audio-permission">Activar Audio</button>
 
     <script>
     
@@ -638,14 +656,39 @@ window.addEventListener('orientationchange', function() {
     }
 });
    
+    
     const radioPlayer = document.getElementById('radio-player');
     const muteButton = document.getElementById('mute-button');
+    const mobilePermissionBtn = document.getElementById('mobile-audio-permission');
     let isRadioPlaying = false;
+    let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
     
-    function toggleRadio() {
-        if (!isRadioPlaying) {
+    function setupMobileAudio() {
+        if (isMobile) {
+            mobilePermissionBtn.style.display = 'block';
             
+            mobilePermissionBtn.addEventListener('click', () => {
+                
+                radioPlayer.src = 'https://radioislanegra.org/listen/rin/stream';
+                radioPlayer.play()
+                    .then(() => {
+                        isRadioPlaying = true;
+                        muteButton.style.display = 'block';
+                        mobilePermissionBtn.style.display = 'none';
+                        muteButton.textContent = '🔊';
+                    })
+                    .catch(e => {
+                        console.error("Error en móvil:", e);
+                        alert("No se pudo iniciar el audio. Asegúrate de no estar en modo ahorro de datos.");
+                    });
+            });
+        }
+    }
+
+    
+    function toggleRadio(start) {
+        if (start && !isRadioPlaying) {
             radioPlayer.src = 'https://radioislanegra.org/listen/rin/stream';
             radioPlayer.play()
                 .then(() => {
@@ -653,16 +696,28 @@ window.addEventListener('orientationchange', function() {
                     muteButton.style.display = 'block';
                     muteButton.textContent = '🔊';
                 })
-                .catch(error => {
-                    console.error('Error al reproducir la radio:', error);
-                    
+                .catch(e => {
+                    if (isMobile) {
+                        mobilePermissionBtn.style.display = 'block';
+                    }
+                    console.error("Error al iniciar radio:", e);
                 });
-        } else {
-            
+        } else if (!start && isRadioPlaying) {
             radioPlayer.pause();
-            radioPlayer.src = '';
             isRadioPlaying = false;
             muteButton.style.display = 'none';
+        }
+    }
+
+    
+    function toggleCatComputer() {
+        catComputerVisible = !catComputerVisible;
+        
+        if (catComputerVisible) {
+            catComputerContainer.style.display = 'block';
+            toggleRadio(true);
+        } else {
+            toggleRadio(false);
         }
     }
 
@@ -673,21 +728,17 @@ window.addEventListener('orientationchange', function() {
     });
 
     
-    function toggleCatComputer() {
-        catComputerVisible = !catComputerVisible;
+    if (isMobile) {
         
-        if (catComputerVisible) {
-            catComputerContainer.style.display = 'block';
-            
-            toggleRadio();
-            
-            
-        } else {
-            
-            toggleRadio();
-            
-            
+        radioPlayer.type = 'audio/aac'; 
+        
+        
+        if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+            radioPlayer.autoplay = false;
+            radioPlayer.preload = 'none';
         }
+        
+        setupMobileAudio();
     }
 
     
@@ -695,9 +746,10 @@ window.addEventListener('orientationchange', function() {
         if (document.hidden && isRadioPlaying) {
             radioPlayer.pause();
         } else if (!document.hidden && isRadioPlaying) {
-            radioPlayer.play();
+            radioPlayer.play().catch(e => console.log("Error al reanudar:", e));
         }
     });
+    
 
     </script>
 </body>

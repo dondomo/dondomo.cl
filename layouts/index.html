@@ -289,6 +289,20 @@
             cursor: pointer;
             display: none; /* Oculto inicialmente */
         }
+            /* Estilos para el botón de audio móvil */
+        #mobile-audio-permission {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 15px;
+            font-size: 14px;
+            display: none;
+        }
     </style>
 <body>
           <div id="cat-computer-container">
@@ -311,10 +325,14 @@
         <div id="running-rabbit"></div>
     </div>
 
-        <audio id="radio-player" preload="none"></audio>
+        <!-- Reproductor de audio -->
+    <audio id="radio-player" crossorigin="anonymous"></audio>
     
     <!-- Botón para mute/desmute -->
     <button id="mute-button">🔇</button>
+    
+    <!-- Botón especial para móviles -->
+    <button id="mobile-audio-permission">Activar Audio</button>
 
     <script>
     // Animación de partículas (tu código original)
@@ -636,15 +654,40 @@ window.addEventListener('orientationchange', function() {
         }, 100);
     }
 });
-   // Configuración del reproductor de radio
+   
+    // Variables globales
     const radioPlayer = document.getElementById('radio-player');
     const muteButton = document.getElementById('mute-button');
+    const mobilePermissionBtn = document.getElementById('mobile-audio-permission');
     let isRadioPlaying = false;
+    let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-    // Función para alternar el audio
-    function toggleRadio() {
-        if (!isRadioPlaying) {
-            // Iniciar la radio
+    // Función para manejar la reproducción en móviles
+    function setupMobileAudio() {
+        if (isMobile) {
+            mobilePermissionBtn.style.display = 'block';
+            
+            mobilePermissionBtn.addEventListener('click', () => {
+                // Esto activará el audio por interacción del usuario
+                radioPlayer.src = 'https://radioislanegra.org/listen/rin/stream';
+                radioPlayer.play()
+                    .then(() => {
+                        isRadioPlaying = true;
+                        muteButton.style.display = 'block';
+                        mobilePermissionBtn.style.display = 'none';
+                        muteButton.textContent = '🔊';
+                    })
+                    .catch(e => {
+                        console.error("Error en móvil:", e);
+                        alert("No se pudo iniciar el audio. Asegúrate de no estar en modo ahorro de datos.");
+                    });
+            });
+        }
+    }
+
+    // Función para iniciar/detener la radio
+    function toggleRadio(start) {
+        if (start && !isRadioPlaying) {
             radioPlayer.src = 'https://radioislanegra.org/listen/rin/stream';
             radioPlayer.play()
                 .then(() => {
@@ -652,51 +695,60 @@ window.addEventListener('orientationchange', function() {
                     muteButton.style.display = 'block';
                     muteButton.textContent = '🔊';
                 })
-                .catch(error => {
-                    console.error('Error al reproducir la radio:', error);
-                    // Mostrar mensaje al usuario si es necesario
+                .catch(e => {
+                    if (isMobile) {
+                        mobilePermissionBtn.style.display = 'block';
+                    }
+                    console.error("Error al iniciar radio:", e);
                 });
-        } else {
-            // Detener la radio
+        } else if (!start && isRadioPlaying) {
             radioPlayer.pause();
-            radioPlayer.src = '';
             isRadioPlaying = false;
             muteButton.style.display = 'none';
         }
     }
 
-    // Controlador para el botón de mute
-    muteButton.addEventListener('click', () => {
-        radioPlayer.muted = !radioPlayer.muted;
-        muteButton.textContent = radioPlayer.muted ? '🔇' : '🔊';
-    });
-
-    // Modificar la función toggleCatComputer para controlar la radio
+    // Modificar la función toggleCatComputer
     function toggleCatComputer() {
         catComputerVisible = !catComputerVisible;
         
         if (catComputerVisible) {
             catComputerContainer.style.display = 'block';
-            // Iniciar la radio cuando aparece el gato
-            toggleRadio();
-            
-            // ... (resto de tu animación de entrada existente) ...
+            toggleRadio(true);
         } else {
-            // Detener la radio cuando desaparece el gato
-            toggleRadio();
-            
-            // ... (resto de tu animación de salida existente) ...
+            toggleRadio(false);
         }
     }
 
-    // Manejar la pausa automática cuando cambia la pestaña
+    // Botón de mute
+    muteButton.addEventListener('click', () => {
+        radioPlayer.muted = !radioPlayer.muted;
+        muteButton.textContent = radioPlayer.muted ? '🔇' : '🔊';
+    });
+
+    // Inicialización para móviles
+    if (isMobile) {
+        // Cambiar el tipo de stream para mejor compatibilidad
+        radioPlayer.type = 'audio/aac'; // o 'audio/mpeg' según el stream
+        
+        // Configuración especial para iOS
+        if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+            radioPlayer.autoplay = false;
+            radioPlayer.preload = 'none';
+        }
+        
+        setupMobileAudio();
+    }
+
+    // Manejar cambios de visibilidad
     document.addEventListener('visibilitychange', () => {
         if (document.hidden && isRadioPlaying) {
             radioPlayer.pause();
         } else if (!document.hidden && isRadioPlaying) {
-            radioPlayer.play();
+            radioPlayer.play().catch(e => console.log("Error al reanudar:", e));
         }
     });
+    
 
     </script>
 </body>
