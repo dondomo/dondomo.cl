@@ -268,6 +268,28 @@
             bottom: 5%;
         }
     }
+
+
+         
+        #radio-player {
+            display: none;
+        }
+
+         
+        #mute-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: none;  
+        }
     </style>
 <body>
           <div id="cat-computer-container">
@@ -289,6 +311,12 @@
     <div id="rabbit-container">
         <div id="running-rabbit"></div>
     </div>
+
+        <audio id="radio-player" preload="none"></audio>
+    
+    
+    <button id="mute-button">🔇</button>
+
     <script>
     
     const canvas = document.getElementById('canvas1');
@@ -609,6 +637,68 @@ window.addEventListener('orientationchange', function() {
         }, 100);
     }
 });
+   
+    const radioPlayer = document.getElementById('radio-player');
+    const muteButton = document.getElementById('mute-button');
+    let isRadioPlaying = false;
+
+    
+    function toggleRadio() {
+        if (!isRadioPlaying) {
+            
+            radioPlayer.src = 'https://radioislanegra.org/listen/rin/stream';
+            radioPlayer.play()
+                .then(() => {
+                    isRadioPlaying = true;
+                    muteButton.style.display = 'block';
+                    muteButton.textContent = '🔊';
+                })
+                .catch(error => {
+                    console.error('Error al reproducir la radio:', error);
+                    
+                });
+        } else {
+            
+            radioPlayer.pause();
+            radioPlayer.src = '';
+            isRadioPlaying = false;
+            muteButton.style.display = 'none';
+        }
+    }
+
+    
+    muteButton.addEventListener('click', () => {
+        radioPlayer.muted = !radioPlayer.muted;
+        muteButton.textContent = radioPlayer.muted ? '🔇' : '🔊';
+    });
+
+    
+    function toggleCatComputer() {
+        catComputerVisible = !catComputerVisible;
+        
+        if (catComputerVisible) {
+            catComputerContainer.style.display = 'block';
+            
+            toggleRadio();
+            
+            
+        } else {
+            
+            toggleRadio();
+            
+            
+        }
+    }
+
+    
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden && isRadioPlaying) {
+            radioPlayer.pause();
+        } else if (!document.hidden && isRadioPlaying) {
+            radioPlayer.play();
+        }
+    });
+
     </script>
 </body>
 </html>

@@ -267,6 +267,28 @@
             bottom: 5%;
         }
     }
+
+
+        /* Estilos para el reproductor de audio (oculto) */
+        #radio-player {
+            display: none;
+        }
+
+        /* Estilos para el botón de mute */
+        #mute-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: none; /* Oculto inicialmente */
+        }
     </style>
 <body>
           <div id="cat-computer-container">
@@ -288,6 +310,12 @@
     <div id="rabbit-container">
         <div id="running-rabbit"></div>
     </div>
+
+        <audio id="radio-player" preload="none"></audio>
+    
+    <!-- Botón para mute/desmute -->
+    <button id="mute-button">🔇</button>
+
     <script>
     // Animación de partículas (tu código original)
     const canvas = document.getElementById('canvas1');
@@ -608,6 +636,68 @@ window.addEventListener('orientationchange', function() {
         }, 100);
     }
 });
+   // Configuración del reproductor de radio
+    const radioPlayer = document.getElementById('radio-player');
+    const muteButton = document.getElementById('mute-button');
+    let isRadioPlaying = false;
+
+    // Función para alternar el audio
+    function toggleRadio() {
+        if (!isRadioPlaying) {
+            // Iniciar la radio
+            radioPlayer.src = 'https://radioislanegra.org/listen/rin/stream';
+            radioPlayer.play()
+                .then(() => {
+                    isRadioPlaying = true;
+                    muteButton.style.display = 'block';
+                    muteButton.textContent = '🔊';
+                })
+                .catch(error => {
+                    console.error('Error al reproducir la radio:', error);
+                    // Mostrar mensaje al usuario si es necesario
+                });
+        } else {
+            // Detener la radio
+            radioPlayer.pause();
+            radioPlayer.src = '';
+            isRadioPlaying = false;
+            muteButton.style.display = 'none';
+        }
+    }
+
+    // Controlador para el botón de mute
+    muteButton.addEventListener('click', () => {
+        radioPlayer.muted = !radioPlayer.muted;
+        muteButton.textContent = radioPlayer.muted ? '🔇' : '🔊';
+    });
+
+    // Modificar la función toggleCatComputer para controlar la radio
+    function toggleCatComputer() {
+        catComputerVisible = !catComputerVisible;
+        
+        if (catComputerVisible) {
+            catComputerContainer.style.display = 'block';
+            // Iniciar la radio cuando aparece el gato
+            toggleRadio();
+            
+            // ... (resto de tu animación de entrada existente) ...
+        } else {
+            // Detener la radio cuando desaparece el gato
+            toggleRadio();
+            
+            // ... (resto de tu animación de salida existente) ...
+        }
+    }
+
+    // Manejar la pausa automática cuando cambia la pestaña
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden && isRadioPlaying) {
+            radioPlayer.pause();
+        } else if (!document.hidden && isRadioPlaying) {
+            radioPlayer.play();
+        }
+    });
+
     </script>
 </body>
 </html>
