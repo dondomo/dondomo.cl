@@ -225,42 +225,47 @@
             z-index: 50;
         }
 
-                /* Nuevos estilos para el gato en computadora */
-        #cat-computer-container {
-            position: fixed;
-            bottom: 10%;
-            right: 60%;
-            width: 300px;
-            height: 200px;
-            z-index: 40;
-            display: none;
-            pointer-events: none;
-        }
-
-        #computer-cat {
-            width: 100%;
-            height: 100%;
-            background-image: url('/images/cat-computer.gif');
-            background-size: contain;
-            background-repeat: no-repeat;
-            z-index: -30;
-                position: fixed;
-                top: 20px;
-                left: 20px;
-                width: 250px;
-                height: 180px;
-        }
-
-        /* Estilos para pantallas pequeñas  */
-@media (max-width: 768px) {
+   /* Estilos para el gato en computadora - Versión mejorada */
     #cat-computer-container {
-        width: 200px;
-        height: 150px;
-        bottom: 15%;
-        right: 50%;
+        position: fixed;
+        bottom: 15%;  /* Posición más centrada verticalmente */
+        right: 5%;    /* Posición desde la derecha */
+        width: 280px; /* Tamaño adecuado para desktop */
+        height: 210px;
+        z-index: 60;  /* Asegurar que esté sobre otros elementos */
+        display: none;
+        pointer-events: none;
+        transition: all 0.3s ease;
     }
-}
 
+    #computer-cat {
+        width: 100%;
+        height: 100%;
+        background-image: url('/images/cat-computer.gif');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    /* Ajustes específicos para móviles */
+    @media (max-width: 768px) {
+        #cat-computer-container {
+            width: 180px;  /* Tamaño más pequeño para móviles */
+            height: 135px;
+            bottom: 10%;  /* Posición más baja */
+            right: 50%;    /* Centrado horizontal */
+            transform: translateX(50%); /* Centrado preciso */
+        }
+    }
+
+    /* Ajustes para pantallas muy pequeñas */
+    @media (max-width: 480px) {
+        #cat-computer-container {
+            width: 150px;
+            height: 112px;
+            bottom: 5%;
+        }
+    }
     </style>
 <body>
           <div id="cat-computer-container">
@@ -537,53 +542,71 @@
         }
     });
 
-    // Animación del gato en computadora
-    const brocoliButton = document.getElementById('rabbitButton'); // Usando el mismo botón del brócoli
-    const catComputerContainer = document.getElementById('cat-computer-container');
-    let catComputerVisible = false;
+    // Animación del gato en computadora - Versión mejorada
+const brocoliButton = document.getElementById('rabbitButton');
+const catComputerContainer = document.getElementById('cat-computer-container');
+let catComputerVisible = false;
 
-    brocoliButton.addEventListener('click', toggleCatComputer);
+brocoliButton.addEventListener('click', toggleCatComputer);
 
-    function toggleCatComputer() {
-        catComputerVisible = !catComputerVisible;
-        if (catComputerVisible) {
-            catComputerContainer.style.display = 'block';
+function toggleCatComputer() {
+    catComputerVisible = !catComputerVisible;
+    
+    if (catComputerVisible) {
+        // Asegurarse de que el contenedor sea visible antes de animar
+        catComputerContainer.style.display = 'block';
+        void catComputerContainer.offsetWidth; // Forzar reflow
+        
+        // Animación de entrada suave
+        catComputerContainer.style.opacity = '0';
+        catComputerContainer.style.transform = 'translateY(20px)';
+        
+        let opacity = 0;
+        let translateY = 20;
+        const fadeIn = () => {
+            opacity += 0.05;
+            translateY -= 1;
+            catComputerContainer.style.opacity = opacity;
             
-            // Animación de entrada
-            catComputerContainer.style.opacity = '0';
-            catComputerContainer.style.transform = 'translateY(20px)';
+            // Solo aplicar transform en desktop
+            if (window.innerWidth > 768) {
+                catComputerContainer.style.transform = `translateY(${translateY}px)`;
+            }
             
-            let opacity = 0;
-            let translateY = 20;
-            const fadeIn = setInterval(() => {
-                opacity += 0.05;
-                translateY -= 1;
-                catComputerContainer.style.opacity = opacity;
-                catComputerContainer.style.transform = `translateY(${translateY}px)`;
-                
-                if (opacity >= 1) {
-                    clearInterval(fadeIn);
-                    catComputerContainer.style.opacity = '1';
-                    catComputerContainer.style.transform = 'translateY(0)';
-                }
-            }, 16);
-        } else {
-            // Animación de salida
-            let opacity = 1;
-            let translateY = 0;
-            const fadeOut = setInterval(() => {
-                opacity -= 0.05;
-                translateY += 1;
-                catComputerContainer.style.opacity = opacity;
-                catComputerContainer.style.transform = `translateY(${translateY}px)`;
-                
-                if (opacity <= 0) {
-                    clearInterval(fadeOut);
-                    catComputerContainer.style.display = 'none';
-                }
-            }, 16);
-        }
+            if (opacity < 1) {
+                requestAnimationFrame(fadeIn);
+            }
+        };
+        requestAnimationFrame(fadeIn);
+    } else {
+        // Animación de salida suave
+        let opacity = 1;
+        const fadeOut = () => {
+            opacity -= 0.05;
+            catComputerContainer.style.opacity = opacity;
+            
+            if (opacity > 0) {
+                requestAnimationFrame(fadeOut);
+            } else {
+                catComputerContainer.style.display = 'none';
+            }
+        };
+        requestAnimationFrame(fadeOut);
     }
+}
+
+// Manejar cambios de orientación en móviles
+window.addEventListener('orientationchange', function() {
+    if (catComputerVisible) {
+        // Pequeño retraso para asegurar que los cálculos sean correctos
+        setTimeout(() => {
+            catComputerContainer.style.display = 'none';
+            setTimeout(() => {
+                catComputerContainer.style.display = 'block';
+            }, 50);
+        }, 100);
+    }
+});
     </script>
 </body>
 </html>
