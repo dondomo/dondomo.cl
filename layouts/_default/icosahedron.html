@@ -1,50 +1,108 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Icosaedro rotando en Y (Three.js)</title>
-    <style>
-        body { margin: 0; overflow: hidden; }
-        canvas { display: block; }
-    </style>
-</head>
-<body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script>
-        // 1. Configurar escena, cámara y renderizador
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+<!-- layouts/partials/icosaedro.html -->
+<div id="icosaedro-container" style="width: 100%; height: 100vh;"></div>
 
-        // 2. Crear un icosaedro
-        const geometry = new THREE.IcosahedronGeometry(1, 0);
-        const material = new THREE.MeshBasicMaterial({ 
-            color: 0x00ff00, 
-            wireframe: true // Para verlo como estructura de alambre
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // 1. Configuración básica
+        const container = document.getElementById('icosaedro-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(
+            75,
+            container.clientWidth / container.clientHeight,
+            0.1,
+            1000
+        );
+        const renderer = new THREE.WebGLRenderer({ 
+            antialias: true,
+            alpha: true
         });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(renderer.domElement);
+
+        // 2. Crear icosaedro con orientación corregida
+        const geometry = new THREE.IcosahedronGeometry(1, 0);
+        
+
+// Encuentra el vértice más alto y más bajo en Y
+        geometry.computeBoundingBox();
+        const maxY = geometry.boundingBox.max.y;
+        const minY = geometry.boundingBox.min.y;
+
+// Calcula el centro Y entre los dos vértices extremos
+        const centerY = (maxY + minY) / 2;
+
+// Centra la geometría en Y
+        geometry.translate(0, -centerY, 0);
+
+// Ahora, encuentra el vértice más cercano a (0, maxY, 0)
+let topVertex = null;
+let minDist = Infinity;
+for (let i = 0; i < geometry.attributes.position.count; i++) {
+    const x = geometry.attributes.position.getX(i);
+    const y = geometry.attributes.position.getY(i);
+    const z = geometry.attributes.position.getZ(i);
+    const dist = Math.sqrt(x * x + (y - (maxY - centerY)) ** 2 + z * z);
+    if (dist < minDist) {
+        minDist = dist;
+        topVertex = new THREE.Vector3(x, y, z);
+    }
+}
+
+// Calcula el ángulo entre el eje Y y el vector al vértice superior
+const up = new THREE.Vector3(0, 1, 0);
+const axis = new THREE.Vector3().crossVectors(topVertex, up).normalize();
+const angle = topVertex.angleTo(up);
+
+// Rota la geometría para alinear el vértice superior con el eje Y
+geometry.applyMatrix4(new THREE.Matrix4().makeRotationAxis(axis, angle));
+
+        
+        const material = new THREE.MeshPhongMaterial({
+            color: 0xcfcfcf,
+            flatShading: true,
+            shininess: 100,
+            side: THREE.DoubleSide
+        });
+        
         const icosaedro = new THREE.Mesh(geometry, material);
         scene.add(icosaedro);
 
-        // 3. Posicionar la cámara
-        camera.position.z = 3;
+        // 3. Sistema de ejes de referencia (opcional para debug)
+        //const axesHelper = new THREE.AxesHelper(2);
+        //scene.add(axesHelper);
 
-        // 4. Animación (rotación SOLO en eje Y)
+        // 4. Configuración de luces
+        const light1 = new THREE.DirectionalLight(0xffffff, 1);
+        light1.position.set(1, 1, 1);
+        scene.add(light1);
+        
+        const light2 = new THREE.DirectionalLight(0xffffff, 0.5);
+        light2.position.set(-1, -1, -1);
+        scene.add(light2);
+        
+        scene.add(new THREE.AmbientLight(0x404040));
+
+        // 5. Posición de cámara
+        camera.position.z = 3;
+        camera.position.y = 0.5; // Vista ligeramente elevada
+
+        // 6. Animación con rotación perfectamente alineada
         function animate() {
             requestAnimationFrame(animate);
-            icosaedro.rotation.y += 0.01; // Solo modificamos .rotation.y
+            
+            // Rotación solo en el eje Y
+            icosaedro.rotation.y += 0.005;
+            
             renderer.render(scene, camera);
         }
         animate();
 
-        // Opcional: Ajustar tamaño al cambiar ventana
+        // 7. Control de resolución
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.aspect = container.clientWidth / container.clientHeight;
             camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setSize(container.clientWidth, container.clientHeight);
         });
-    </script>
-</body>
-</html>
+    });
+</script>
