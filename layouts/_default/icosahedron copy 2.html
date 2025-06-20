@@ -10,6 +10,7 @@
 </head>
 <body>
 <div id="icosaedro-container" style="width: 100%; height: 100vh;"></div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -29,26 +30,31 @@ document.addEventListener('DOMContentLoaded', () => {
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.appendChild(renderer.domElement);
 
-    // 2. Crear icosaedro
+    // 2. Crear icosaedro con orientación corregida
     const geometry = new THREE.IcosahedronGeometry(1, 0);
 
     // Asegura que geometry.index exista
-    if (!geometry.index) {
-        const indices = [];
-        for (let i = 0; i < geometry.attributes.position.count; i++) {
-            indices.push(i);
-        }
-        geometry.setIndex(indices);
+if (!geometry.index) {
+    // Crea un índice secuencial para triángulos
+    const indices = [];
+    for (let i = 0; i < geometry.attributes.position.count; i++) {
+        indices.push(i);
     }
+    geometry.setIndex(indices);
+}
 
     // Encuentra el vértice más alto y más bajo en Y
     geometry.computeBoundingBox();
     const maxY = geometry.boundingBox.max.y;
     const minY = geometry.boundingBox.min.y;
+
+    // Calcula el centro Y entre los dos vértices extremos
     const centerY = (maxY + minY) / 2;
+
+    // Centra la geometría en Y
     geometry.translate(0, -centerY, 0);
 
-    // Alinear el vértice superior con el eje Y
+    // Ahora, encuentra el vértice más cercano a (0, maxY, 0)
     let topVertex = null;
     let minDist = Infinity;
     for (let i = 0; i < geometry.attributes.position.count; i++) {
@@ -61,12 +67,26 @@ document.addEventListener('DOMContentLoaded', () => {
             topVertex = new THREE.Vector3(x, y, z);
         }
     }
+
+    // Calcula el ángulo entre el eje Y y el vector al vértice superior
     const up = new THREE.Vector3(0, 1, 0);
     const axis = new THREE.Vector3().crossVectors(topVertex, up).normalize();
     const angle = topVertex.angleTo(up);
+
+    // Rota la geometría para alinear el vértice superior con el eje Y
     geometry.applyMatrix4(new THREE.Matrix4().makeRotationAxis(axis, angle));
 
+    // --- Cambia a MeshPhongMaterial con vertexColors ---
+    const material = new THREE.MeshPhongMaterial({
+        color: 0x00cfcf,
+        flatShading: true,
+        shininess: 100,
+        side: THREE.DoubleSide,
+        vertexColors: true
+    });
 
+    const icosaedro = new THREE.Mesh(geometry, material);
+    scene.add(icosaedro);
 
     // --- Identificar las 5 caras centrales ---
     const faceCount = geometry.index.count / 3;
@@ -79,149 +99,112 @@ document.addEventListener('DOMContentLoaded', () => {
         const vB = new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, b);
         const vC = new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, c);
         const center = new THREE.Vector3().addVectors(vA, vB).add(vC).divideScalar(3);
-        faceCenters.push({ index: i, center, verts: [a, b, c] });
+        faceCenters.push({ index: i, center });
     }
+    // Ordenar por distancia al plano Y=0 y tomar las 5 más cercanas (las centrales)
     faceCenters.sort((f1, f2) => Math.abs(f1.center.y) - Math.abs(f2.center.y));
-    const centralFaces = faceCenters.slice(0, 5);
-
-
-    // Fondo negro
-    scene.background = new THREE.Color(0x000000);
-
-    // --- Wireframe para todo el icosaedro ---
-    const wireframe = new THREE.Mesh(
-        geometry,
-        new THREE.MeshBasicMaterial({ color: 0x00cfcf, wireframe: true })
-    );
-    scene.add(wireframe);
-
-    // --- Imagen diferente para cada cara central ---
-    const imagePaths = [
-        '/images/menu/somos.png',      // Cambia estas rutas por tus imágenes
-        '/images/menu/catalogo.png',
-        '/images/menu/proyectos.png',
-        '/images/menu/especiales.png',
-        '/images/menu/contacto.png',
-    ];
-
-    const textureLoader = new THREE.TextureLoader();
-    const centralMeshes = [];
-
-    for (let i = 0; i < 5; i++) {
-        // Crear geometría para una sola cara
-        const face = centralFaces[i];
-        const faceGeom = new THREE.BufferGeometry();
-
-        // Posiciones de los 3 vértices
-        const positions = [];
-        for (const vi of face.verts) {
-            positions.push(
-                geometry.attributes.position.getX(vi),
-                geometry.attributes.position.getY(vi),
-                geometry.attributes.position.getZ(vi)
-            );
-        }
-        faceGeom.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-        faceGeom.setIndex([0, 1, 2]);
-        faceGeom.computeVertexNormals();
-
-  
-// UVs originales del triángulo
-const baseUVs = [
-    [0, 0],
-    [1, 0],
-    [0.5, 1]
-];
-
-// Rota los UVs -45 grados (antihorario)
-const angle = -Math.PI / 2;
-const cx = 0.5, cy = 0.5; // Centro de rotación en el espacio UV
-const rotatedUVs = baseUVs.map(([u, v]) => {
-    // Trasladar al centro
-    let x = u - cx;
-    let y = v - cy;
-    // Rotar
-    let x2 = x * Math.cos(angle) - y * Math.sin(angle);
-    let y2 = x * Math.sin(angle) + y * Math.cos(angle);
-    // Volver a trasladar
-    return [x2 + cx, y2 + cy];
-});
-const uvs = new Float32Array([
-    rotatedUVs[0][0], rotatedUVs[0][1],
-    rotatedUVs[1][0], rotatedUVs[1][1],
-    rotatedUVs[2][0], rotatedUVs[2][1]
-]);
-faceGeom.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
-
-   // Material con textura, sin luces
-    const texture = textureLoader.load(imagePaths[i]);
-    const mat = new THREE.MeshBasicMaterial({
-        map: texture,
-        side: THREE.DoubleSide,
-        transparent: true
-    });
-
-        const mesh = new THREE.Mesh(faceGeom, mat);
-        scene.add(mesh);
-        centralMeshes.push(mesh);
-    }
+    const centralFaces = faceCenters.slice(0, 5).map(f => f.index);
 
     // --- Raycaster y control de animación ---
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
+    let isHovering = false;
     let hoveredFace = null;
     let animationActive = true;
 
+    // Colores originales y de hover
+    const faceColor = new THREE.Color(0x00cfcf);
+    const hoverColor = new THREE.Color(0xffa500);
+
+    // Inicializar colores por vértice
+    const colors = [];
+    for (let i = 0; i < geometry.attributes.position.count; i++) {
+        colors.push(faceColor.r, faceColor.g, faceColor.b);
+    }
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+    // Función para colorear una cara
+    function setFaceColor(faceIdx, color) {
+        for (let j = 0; j < 3; j++) {
+            const vi = geometry.index.getX(faceIdx * 3 + j);
+            colors[vi * 3] = color.r;
+            colors[vi * 3 + 1] = color.g;
+            colors[vi * 3 + 2] = color.b;
+        }
+        geometry.attributes.color.needsUpdate = true;
+    }
+
     // --- Eventos de mouse ---
     renderer.domElement.addEventListener('mousemove', (event) => {
+        // Normalizar coordenadas mouse
         const rect = renderer.domElement.getBoundingClientRect();
         mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
         mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
         raycaster.setFromCamera(mouse, camera);
-        let found = false;
-        for (let i = 0; i < centralMeshes.length; i++) {
-            const intersects = raycaster.intersectObject(centralMeshes[i]);
-            if (intersects.length > 0) {
-                animationActive = false;
+        const intersects = raycaster.intersectObject(icosaedro);
+
+        if (intersects.length > 0) {
+            isHovering = true;
+            animationActive = false;
+            // Detectar si es una de las caras centrales
+            const faceIdx = intersects[0].faceIndex;
+            if (centralFaces.includes(faceIdx)) {
                 container.style.cursor = 'pointer';
-                hoveredFace = i;
-                found = true;
-                break;
+                if (hoveredFace !== faceIdx) {
+                    if (hoveredFace !== null) setFaceColor(hoveredFace, faceColor);
+                    setFaceColor(faceIdx, hoverColor);
+                    hoveredFace = faceIdx;
+                }
+            } else {
+                container.style.cursor = 'default';
+                if (hoveredFace !== null) setFaceColor(hoveredFace, faceColor);
+                hoveredFace = null;
             }
-        }
-        if (!found) {
+        } else {
+            isHovering = false;
             animationActive = true;
             container.style.cursor = 'default';
+            if (hoveredFace !== null) setFaceColor(hoveredFace, faceColor);
             hoveredFace = null;
         }
     });
 
     renderer.domElement.addEventListener('mouseleave', () => {
+        isHovering = false;
         animationActive = true;
         container.style.cursor = 'default';
+        if (hoveredFace !== null) setFaceColor(hoveredFace, faceColor);
         hoveredFace = null;
     });
 
     renderer.domElement.addEventListener('click', (event) => {
-        if (hoveredFace !== null) {
-            alert('¡Botón: ' + imagePaths[hoveredFace] + '!');
+        if (hoveredFace !== null && centralFaces.includes(hoveredFace)) {
+            alert('¡Botón central ' + (centralFaces.indexOf(hoveredFace) + 1) + ' pulsado!');
+            // Aquí puedes ejecutar la acción que desees para cada botón
         }
     });
 
+    // 4. Configuración de luces
+    const light1 = new THREE.DirectionalLight(0xffffff, 1);
+    light1.position.set(1, 1, 1);
+    scene.add(light1);
+
+    const light2 = new THREE.DirectionalLight(0xffffff, 0.4);
+    light2.position.set(-1, -1, -1);
+    scene.add(light2);
+
+    scene.add(new THREE.AmbientLight(0x404040));
 
     // 5. Posición de cámara
     camera.position.z = 3;
-    camera.position.y = 0;
+    camera.position.y = 0; // Vista ligeramente elevada
 
-    // 6. Animación
+    // 6. Animación con rotación perfectamente alineada
     function animate() {
         requestAnimationFrame(animate);
         if (animationActive) {
-            wireframe.rotation.y += 0.005;
-            for (const mesh of centralMeshes) {
-                mesh.rotation.y += 0.005;
-            }
+            icosaedro.rotation.y += 0.005;
         }
         renderer.render(scene, camera);
     }

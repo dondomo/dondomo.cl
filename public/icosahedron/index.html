@@ -1,108 +1,239 @@
-
-<script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><div id="icosaedro-container" style="width: 100%; height: 100vh;"></div>
-
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Icosaedro</title>
+  <style>
+    html, body { margin: 0; padding: 0; width: 100vw; height: 100vh; }
+    #icosaedro-container { width: 100vw; height: 100vh; display: block; }
+  </style>
+</head>
+<body>
+<div id="icosaedro-container" style="width: 100%; height: 100vh;"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        
-        const container = document.getElementById('icosaedro-container');
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(
-            75,
-            container.clientWidth / container.clientHeight,
-            0.1,
-            1000
-        );
-        const renderer = new THREE.WebGLRenderer({ 
-            antialias: true,
-            alpha: true
-        });
-        renderer.setSize(container.clientWidth, container.clientHeight);
-        container.appendChild(renderer.domElement);
-
-        
-        const geometry = new THREE.IcosahedronGeometry(1, 0);
-        
-
-
-        geometry.computeBoundingBox();
-        const maxY = geometry.boundingBox.max.y;
-        const minY = geometry.boundingBox.min.y;
-
-
-        const centerY = (maxY + minY) / 2;
-
-
-        geometry.translate(0, -centerY, 0);
-
-
-let topVertex = null;
-let minDist = Infinity;
-for (let i = 0; i < geometry.attributes.position.count; i++) {
-    const x = geometry.attributes.position.getX(i);
-    const y = geometry.attributes.position.getY(i);
-    const z = geometry.attributes.position.getZ(i);
-    const dist = Math.sqrt(x * x + (y - (maxY - centerY)) ** 2 + z * z);
-    if (dist < minDist) {
-        minDist = dist;
-        topVertex = new THREE.Vector3(x, y, z);
-    }
-}
-
-
-const up = new THREE.Vector3(0, 1, 0);
-const axis = new THREE.Vector3().crossVectors(topVertex, up).normalize();
-const angle = topVertex.angleTo(up);
-
-
-geometry.applyMatrix4(new THREE.Matrix4().makeRotationAxis(axis, angle));
-
-        
-        const material = new THREE.MeshPhongMaterial({
-            color: 0xcfcfcf,
-            flatShading: true,
-            shininess: 100,
-            side: THREE.DoubleSide
-        });
-        
-        const icosaedro = new THREE.Mesh(geometry, material);
-        scene.add(icosaedro);
-
-        
-        
-        
-
-        
-        const light1 = new THREE.DirectionalLight(0xffffff, 1);
-        light1.position.set(1, 1, 1);
-        scene.add(light1);
-        
-        const light2 = new THREE.DirectionalLight(0xffffff, 0.5);
-        light2.position.set(-1, -1, -1);
-        scene.add(light2);
-        
-        scene.add(new THREE.AmbientLight(0x404040));
-
-        
-        camera.position.z = 3;
-        camera.position.y = 0.5; 
-
-        
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            
-            icosaedro.rotation.y += 0.005;
-            
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        
-        window.addEventListener('resize', () => {
-            camera.aspect = container.clientWidth / container.clientHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(container.clientWidth, container.clientHeight);
-        });
+document.addEventListener('DOMContentLoaded', () => {
+    
+    const container = document.getElementById('icosaedro-container');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(
+        75,
+        container.clientWidth / container.clientHeight,
+        0.1,
+        1000
+    );
+    const renderer = new THREE.WebGLRenderer({ 
+        antialias: true,
+        alpha: true
     });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(renderer.domElement);
+
+    
+    const geometry = new THREE.IcosahedronGeometry(1, 0);
+
+    
+    if (!geometry.index) {
+        const indices = [];
+        for (let i = 0; i < geometry.attributes.position.count; i++) {
+            indices.push(i);
+        }
+        geometry.setIndex(indices);
+    }
+
+    
+    geometry.computeBoundingBox();
+    const maxY = geometry.boundingBox.max.y;
+    const minY = geometry.boundingBox.min.y;
+    const centerY = (maxY + minY) / 2;
+    geometry.translate(0, -centerY, 0);
+
+    
+    let topVertex = null;
+    let minDist = Infinity;
+    for (let i = 0; i < geometry.attributes.position.count; i++) {
+        const x = geometry.attributes.position.getX(i);
+        const y = geometry.attributes.position.getY(i);
+        const z = geometry.attributes.position.getZ(i);
+        const dist = Math.sqrt(x * x + (y - (maxY - centerY)) ** 2 + z * z);
+        if (dist < minDist) {
+            minDist = dist;
+            topVertex = new THREE.Vector3(x, y, z);
+        }
+    }
+    const up = new THREE.Vector3(0, 1, 0);
+    const axis = new THREE.Vector3().crossVectors(topVertex, up).normalize();
+    const angle = topVertex.angleTo(up);
+    geometry.applyMatrix4(new THREE.Matrix4().makeRotationAxis(axis, angle));
+
+
+
+    
+    const faceCount = geometry.index.count / 3;
+    const faceCenters = [];
+    for (let i = 0; i < faceCount; i++) {
+        const a = geometry.index.getX(i * 3);
+        const b = geometry.index.getX(i * 3 + 1);
+        const c = geometry.index.getX(i * 3 + 2);
+        const vA = new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, a);
+        const vB = new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, b);
+        const vC = new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, c);
+        const center = new THREE.Vector3().addVectors(vA, vB).add(vC).divideScalar(3);
+        faceCenters.push({ index: i, center, verts: [a, b, c] });
+    }
+    faceCenters.sort((f1, f2) => Math.abs(f1.center.y) - Math.abs(f2.center.y));
+    const centralFaces = faceCenters.slice(0, 5);
+
+
+    
+    scene.background = new THREE.Color(0x000000);
+
+    
+    const wireframe = new THREE.Mesh(
+        geometry,
+        new THREE.MeshBasicMaterial({ color: 0x00cfcf, wireframe: true })
+    );
+    scene.add(wireframe);
+
+    
+    const imagePaths = [
+        '/images/menu/somos.png',      
+        '/images/menu/catalogo.png',
+        '/images/menu/proyectos.png',
+        '/images/menu/especiales.png',
+        '/images/menu/contacto.png',
+    ];
+
+    const textureLoader = new THREE.TextureLoader();
+    const centralMeshes = [];
+
+    for (let i = 0; i < 5; i++) {
+        
+        const face = centralFaces[i];
+        const faceGeom = new THREE.BufferGeometry();
+
+        
+        const positions = [];
+        for (const vi of face.verts) {
+            positions.push(
+                geometry.attributes.position.getX(vi),
+                geometry.attributes.position.getY(vi),
+                geometry.attributes.position.getZ(vi)
+            );
+        }
+        faceGeom.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        faceGeom.setIndex([0, 1, 2]);
+        faceGeom.computeVertexNormals();
+
+  
+
+const baseUVs = [
+    [0, 0],
+    [1, 0],
+    [0.5, 1]
+];
+
+
+const angle = -Math.PI / 2;
+const cx = 0.5, cy = 0.5; 
+const rotatedUVs = baseUVs.map(([u, v]) => {
+    
+    let x = u - cx;
+    let y = v - cy;
+    
+    let x2 = x * Math.cos(angle) - y * Math.sin(angle);
+    let y2 = x * Math.sin(angle) + y * Math.cos(angle);
+    
+    return [x2 + cx, y2 + cy];
+});
+const uvs = new Float32Array([
+    rotatedUVs[0][0], rotatedUVs[0][1],
+    rotatedUVs[1][0], rotatedUVs[1][1],
+    rotatedUVs[2][0], rotatedUVs[2][1]
+]);
+faceGeom.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+
+   
+    const texture = textureLoader.load(imagePaths[i]);
+    const mat = new THREE.MeshBasicMaterial({
+        map: texture,
+        side: THREE.DoubleSide,
+        transparent: true
+    });
+
+        const mesh = new THREE.Mesh(faceGeom, mat);
+        scene.add(mesh);
+        centralMeshes.push(mesh);
+    }
+
+    
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let hoveredFace = null;
+    let animationActive = true;
+
+    
+    renderer.domElement.addEventListener('mousemove', (event) => {
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+        let found = false;
+        for (let i = 0; i < centralMeshes.length; i++) {
+            const intersects = raycaster.intersectObject(centralMeshes[i]);
+            if (intersects.length > 0) {
+                animationActive = false;
+                container.style.cursor = 'pointer';
+                hoveredFace = i;
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            animationActive = true;
+            container.style.cursor = 'default';
+            hoveredFace = null;
+        }
+    });
+
+    renderer.domElement.addEventListener('mouseleave', () => {
+        animationActive = true;
+        container.style.cursor = 'default';
+        hoveredFace = null;
+    });
+
+    renderer.domElement.addEventListener('click', (event) => {
+        if (hoveredFace !== null) {
+            alert('¡Botón: ' + imagePaths[hoveredFace] + '!');
+        }
+    });
+
+
+    
+    camera.position.z = 3;
+    camera.position.y = 0;
+
+    
+    function animate() {
+        requestAnimationFrame(animate);
+        if (animationActive) {
+            wireframe.rotation.y += 0.005;
+            for (const mesh of centralMeshes) {
+                mesh.rotation.y += 0.005;
+            }
+        }
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    
+    window.addEventListener('resize', () => {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+});
 </script>
+</body>
+</html>
