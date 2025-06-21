@@ -8,11 +8,23 @@
     <loc>https://example.org/</loc>
     <lastmod>2025-06-20T12:13:04-03:00</lastmod>
   </url><url>
+    <loc>https://example.org/3d/</loc>
+    <lastmod>2025-05-17T14:54:50-03:00</lastmod>
+  </url><url>
     <loc>https://example.org/domo2/</loc>
     <lastmod>2025-05-16T20:06:59-03:00</lastmod>
   </url><url>
     <loc>https://example.org/tensor/</loc>
     <lastmod>2025-05-16T18:01:10-03:00</lastmod>
+  </url><url>
+    <loc>https://example.org/hexagon/</loc>
+    <lastmod>2025-05-16T12:04:18-03:00</lastmod>
+  </url><url>
+    <loc>https://example.org/domo/</loc>
+    <lastmod>2025-05-16T10:56:07-03:00</lastmod>
+  </url><url>
+    <loc>https://example.org/test1/</loc>
+    <lastmod>2025-05-15T21:08:02-03:00</lastmod>
   </url><url>
     <loc>https://example.org/test2/</loc>
     <lastmod>2025-05-15T21:07:49-03:00</lastmod>
