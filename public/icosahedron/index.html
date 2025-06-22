@@ -16,7 +16,7 @@
       opacity: 0.85;
       pointer-events: auto;
       background: rgba(0,0,0,0.5);
-      color: #fff;
+      color: #f22;
       border: none;
       display: flex;
       align-items: center;
@@ -33,6 +33,17 @@
       gap: 32px;
       z-index: 10;
     }
+
+    @media (max-width: 600px) {
+  .arrow-btn {
+    width: 96px;
+    height: 96px;
+  }
+  .arrow-btn svg {
+    width: 72px;
+    height: 72px;
+  }
+}
   </style>
 </head>
 <body>
@@ -157,7 +168,7 @@ const centralFaces = faceCenters
     
     const wireframe = new THREE.Mesh(
         geometry,
-        new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true })
+        new THREE.MeshBasicMaterial({ color: 0x990000, wireframe: true })
     );
     scene.add(wireframe);
 
