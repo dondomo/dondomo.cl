@@ -8,11 +8,7 @@
     html, body { margin: 0; padding: 0; width: 100vw; height: 100vh; }
     #icosaedro-container { width: 100vw; height: 100vh; display: block; }
     .arrow-btn {
-      position: absolute;
-      bottom: 40px;           /* Cambia top: 50% por bottom */
-      top: auto;
-      transform: none;        /* Elimina translateY(-50%) */
-      z-index: 10;
+      position: static !important;
       width: 64px;
       height: 64px;
       border-radius: 50%;
@@ -28,23 +24,34 @@
     }
     #arrow-left { left: 45%; }   /* Centra horizontalmente */
     #arrow-right { right: 45%; } /* Centra horizontalmente */
+
+    #arrow-container {
+      position: absolute;
+      left: 0; right: 0; bottom: 40px;
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      z-index: 10;
+    }
   </style>
 </head>
 <body>
 <div id="icosaedro-container" style="width: 100%; height: 100vh; position: relative;"></div>
 
-<button id="arrow-left" class="arrow-btn btn btn-dark" style="padding:0;">
-  <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-    <circle cx="24" cy="24" r="23" stroke="#fff" stroke-width="2" fill="rgba(0,0,0,0.5)"/>
-    <polyline points="28,14 18,24 28,34" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
-</button>
-<button id="arrow-right" class="arrow-btn btn btn-dark" style="padding:0;">
-  <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-    <circle cx="24" cy="24" r="23" stroke="#fff" stroke-width="2" fill="rgba(0,0,0,0.5)"/>
-    <polyline points="20,14 30,24 20,34" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
-</button>
+<div id="arrow-container">
+  <button id="arrow-left" class="arrow-btn btn btn-dark" style="position:static;padding:0;">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+      <circle cx="24" cy="24" r="23" stroke="#fff" stroke-width="2" fill="rgba(0,0,0,0.5)"/>
+      <polyline points="28,14 18,24 28,34" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  <button id="arrow-right" class="arrow-btn btn btn-dark" style="position:static;padding:0;">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+      <circle cx="24" cy="24" r="23" stroke="#fff" stroke-width="2" fill="rgba(0,0,0,0.5)"/>
+      <polyline points="20,14 30,24 20,34" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+</div>
 
 <!-- Flechas Bootstrap 
 <button id="arrow-left" class="arrow-btn btn btn-dark">
