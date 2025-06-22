@@ -9,8 +9,9 @@
     #icosaedro-container { width: 100vw; height: 100vh; display: block; }
     .arrow-btn {
       position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
+      bottom: 40px;           /* Cambia top: 50% por bottom */
+      top: auto;
+      transform: none;        /* Elimina translateY(-50%) */
       z-index: 10;
       width: 64px;
       height: 64px;
@@ -25,19 +26,34 @@
       align-items: center;
       justify-content: center;
     }
-    #arrow-left { left: 24px; }
-    #arrow-right { right: 24px; }
+    #arrow-left { left: 45%; }   /* Centra horizontalmente */
+    #arrow-right { right: 45%; } /* Centra horizontalmente */
   </style>
 </head>
 <body>
 <div id="icosaedro-container" style="width: 100%; height: 100vh; position: relative;"></div>
-<!-- Flechas Bootstrap -->
+
+<button id="arrow-left" class="arrow-btn btn btn-dark" style="padding:0;">
+  <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+    <circle cx="24" cy="24" r="23" stroke="#fff" stroke-width="2" fill="rgba(0,0,0,0.5)"/>
+    <polyline points="28,14 18,24 28,34" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
+<button id="arrow-right" class="arrow-btn btn btn-dark" style="padding:0;">
+  <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+    <circle cx="24" cy="24" r="23" stroke="#fff" stroke-width="2" fill="rgba(0,0,0,0.5)"/>
+    <polyline points="20,14 30,24 20,34" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
+
+<!-- Flechas Bootstrap 
 <button id="arrow-left" class="arrow-btn btn btn-dark">
   <span class="bi bi-chevron-left">&#8592;</span>
 </button>
 <button id="arrow-right" class="arrow-btn btn btn-dark">
   <span class="bi bi-chevron-right">&#8594;</span>
 </button>
+-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.js"></script>
 <script>
@@ -314,37 +330,6 @@ faceGeom.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
 
 
     // Permitir arrastrar para rotar el icosaedro
-    let dragDelta = 0;
-
-    renderer.domElement.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        lastX = e.clientX;
-        dragDelta = 0;
-        animationActive = false;
-        autoStopped = true;
-    });
-    window.addEventListener('mousemove', (e) => {
-        if (isDragging) {
-            const deltaX = e.clientX - lastX;
-            dragDelta += deltaX;
-            wireframe.rotation.y += deltaX * 0.01;
-            for (const mesh of centralMeshes) {
-                mesh.rotation.y = wireframe.rotation.y;
-            }
-            lastX = e.clientX;
-        }
-    });
-window.addEventListener('mouseup', () => {
-    if (isDragging) {
-        isDragging = false;
-        if (dragDelta > 0) {
-            targetStep = (targetStep - 1 + 5) % 5;
-        } else if (dragDelta < 0) {
-            targetStep = (targetStep + 1) % 5;
-        }
-        targetRotation = -angleToZ + targetStep * ((2 * Math.PI) / 5);
-    }
-});
 
     // --- Animación modificada para rotar suavemente hacia targetRotation ---
     function animate() {
