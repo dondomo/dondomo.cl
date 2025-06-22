@@ -1,0 +1,7 @@
+function startAutoRotate() {
+    if (autoInterval) clearInterval(autoInterval);
+    autoInterval = setInterval(() => {
+        targetStep = (targetStep + 1) % 5;
+        targetRotation += (2 * Math.PI) / 5; // Suma siempre 72°
+    }, 1000); // 1000 ms = 1 segundo
+}

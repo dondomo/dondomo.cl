@@ -288,6 +288,7 @@ faceGeom.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
     let targetStep = 0; // 0 a 4, cara central activa
     let isDragging = false;
     let lastX = 0;
+    let dragDelta = 0;
 
     // Inicializa targetRotation con la rotación actual
     
@@ -299,13 +300,13 @@ faceGeom.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
     // Al hacer click en las flechas, suma o resta 72° al targetRotation
     arrowLeft.addEventListener('click', () => {
         targetStep = (targetStep - 1 + 5) % 5;
-        targetRotation -= (2 * Math.PI) / 5;
+        targetRotation = -angleToZ + targetStep * ((2 * Math.PI) / 5);
         animationActive = false;
         autoStopped = true;
     });
     arrowRight.addEventListener('click', () => {
         targetStep = (targetStep + 1) % 5;
-        targetRotation += (2 * Math.PI) / 5;
+        targetRotation = -angleToZ + targetStep * ((2 * Math.PI) / 5);
         animationActive = false;
         autoStopped = true;
     });
@@ -316,13 +317,14 @@ faceGeom.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
     renderer.domElement.addEventListener('mousedown', (e) => {
         isDragging = true;
         lastX = e.clientX;
+        dragDelta = 0;
         animationActive = false;
         autoStopped = true;
     });
     window.addEventListener('mousemove', (e) => {
         if (isDragging) {
             const deltaX = e.clientX - lastX;
-            // 0.01 es la sensibilidad, puedes ajustarla
+            dragDelta += deltaX;
             wireframe.rotation.y += deltaX * 0.01;
             for (const mesh of centralMeshes) {
                 mesh.rotation.y = wireframe.rotation.y;
@@ -331,11 +333,24 @@ faceGeom.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
         }
     });
     window.addEventListener('mouseup', () => {
-        isDragging = false;
-        let angle = wireframe.rotation.y + angleToZ;
-        angle = ((angle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-        targetStep = Math.round(angle / ((2 * Math.PI) / 5)) % 5;
-        rotateToStep(targetStep);
+        if (isDragging) {
+            isDragging = false;
+            // Calcula el ángulo actual con el offset de alineación
+            let angle = (wireframe.rotation.y + angleToZ) % (2 * Math.PI);
+            if (angle < 0) angle += 2 * Math.PI;
+            // Calcula el paso actual según la posición real
+            let currentStep = Math.round(angle / ((2 * Math.PI) / 5)) % 5;
+            // Actualiza targetStep al paso actual antes de avanzar
+            targetStep = currentStep;
+            // Ahora avanza uno según el sentido del arrastre
+            if (dragDelta > 0) {
+                targetStep = (targetStep - 1 + 5) % 5;
+            } else if (dragDelta < 0) {
+                targetStep = (targetStep + 1) % 5;
+            }
+            // Calcula el targetRotation relativo al ángulo de alineación
+            targetRotation = -angleToZ + targetStep * ((2 * Math.PI) / 5);
+        }
     });
 
     // --- Animación modificada para rotar suavemente hacia targetRotation ---

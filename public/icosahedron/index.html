@@ -298,6 +298,7 @@ faceGeom.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
 
     
     arrowLeft.addEventListener('click', () => {
+        if (autoInterval) clearInterval(autoInterval);
         targetStep = (targetStep - 1 + 5) % 5;
         targetRotation -= (2 * Math.PI) / 5;
         animationActive = false;
@@ -313,16 +314,19 @@ faceGeom.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
 
 
     
+    let dragDelta = 0;
+
     renderer.domElement.addEventListener('mousedown', (e) => {
         isDragging = true;
         lastX = e.clientX;
+        dragDelta = 0;
         animationActive = false;
         autoStopped = true;
     });
     window.addEventListener('mousemove', (e) => {
         if (isDragging) {
             const deltaX = e.clientX - lastX;
-            
+            dragDelta += deltaX;
             wireframe.rotation.y += deltaX * 0.01;
             for (const mesh of centralMeshes) {
                 mesh.rotation.y = wireframe.rotation.y;
@@ -330,13 +334,17 @@ faceGeom.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
             lastX = e.clientX;
         }
     });
-    window.addEventListener('mouseup', () => {
+window.addEventListener('mouseup', () => {
+    if (isDragging) {
         isDragging = false;
-        let angle = wireframe.rotation.y + angleToZ;
-        angle = ((angle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-        targetStep = Math.round(angle / ((2 * Math.PI) / 5)) % 5;
-        rotateToStep(targetStep);
-    });
+        if (dragDelta > 0) {
+            targetStep = (targetStep - 1 + 5) % 5;
+        } else if (dragDelta < 0) {
+            targetStep = (targetStep + 1) % 5;
+        }
+        targetRotation = -angleToZ + targetStep * ((2 * Math.PI) / 5);
+    }
+});
 
     
     function animate() {
@@ -364,6 +372,51 @@ faceGeom.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
         targetStep = (step + 5) % 5;
         targetRotation += diff * ((2 * Math.PI) / 5);
     }
+
+    let autoInterval = null;
+
+function startAutoRotate() {
+    if (autoInterval) clearInterval(autoInterval);
+    autoInterval = setInterval(() => {
+        targetStep = (targetStep + 1) % 5;
+        targetRotation += (2 * Math.PI) / 5; 
+    }, 1000); 
+}
+
+
+startAutoRotate();
+
+
+
+function stopAutoRotate() {
+    if (autoInterval) clearInterval(autoInterval);
+}
+
+function resumeAutoRotate() {
+    startAutoRotate();
+}
+
+
+arrowLeft.addEventListener('mouseenter', stopAutoRotate);
+arrowRight.addEventListener('mouseenter', stopAutoRotate);
+arrowLeft.addEventListener('mouseleave', resumeAutoRotate);
+arrowRight.addEventListener('mouseleave', resumeAutoRotate);
+
+
+for (const mesh of centralMeshes) {
+    mesh.onBeforeRender = function() {
+        this.userData._raycasted = false;
+    };
+}
+renderer.domElement.addEventListener('mousemove', (event) => {
+    
+    
+    if (hoveredFace !== null) {
+        stopAutoRotate();
+    } else {
+        resumeAutoRotate();
+    }
+});
 });
 </script>
 </body>
