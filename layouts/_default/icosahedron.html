@@ -324,12 +324,14 @@ faceGeom.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
         if (autoInterval) clearInterval(autoInterval);
         targetStep = (targetStep - 1 + 5) % 5;
         targetRotation -= (2 * Math.PI) / 5;
+        animateToTarget(targetRotation);
         animationActive = false;
         autoStopped = true;
     });
     arrowRight.addEventListener('click', () => {
         targetStep = (targetStep + 1) % 5;
         targetRotation += (2 * Math.PI) / 5;
+        animateToTarget(targetRotation);
         animationActive = false;
         autoStopped = true;
     });
@@ -339,16 +341,53 @@ faceGeom.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
     // Permitir arrastrar para rotar el icosaedro
 
     // --- Animación modificada para rotar suavemente hacia targetRotation ---
-    function animate() {
-        requestAnimationFrame(animate);
-        // Interpolación suave hacia targetRotation
-        wireframe.rotation.y += (targetRotation - wireframe.rotation.y) * 0.15;
+    let animating = false;
+let animationStart = 0;
+let animationDuration = 600; // ms
+let rotationFrom = targetRotation;
+let rotationTo = targetRotation;
+
+function easeOutCubic(t) {
+    return 1 - Math.pow(1 - t, 3);
+}
+
+function animateToTarget(newTarget) {
+    animating = true;
+    animationStart = performance.now();
+    rotationFrom = wireframe.rotation.y;
+    // Corrige saltos de más de PI (giro más corto)
+    let delta = ((newTarget - rotationFrom + Math.PI) % (2 * Math.PI)) - Math.PI;
+    rotationTo = rotationFrom + delta;
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    if (animating) {
+        let now = performance.now();
+        let t = Math.min(1, (now - animationStart) / animationDuration);
+        let eased = easeOutCubic(t);
+        wireframe.rotation.y = rotationFrom + (rotationTo - rotationFrom) * eased;
         for (const mesh of centralMeshes) {
             mesh.rotation.y = wireframe.rotation.y;
         }
-        renderer.render(scene, camera);
+        if (t >= 1) {
+            animating = false;
+            wireframe.rotation.y = rotationTo;
+            for (const mesh of centralMeshes) {
+                mesh.rotation.y = wireframe.rotation.y;
+            }
+        }
+    } else {
+        // Si no está animando, asegúrate de que la rotación esté en targetRotation
+        wireframe.rotation.y = targetRotation;
+        for (const mesh of centralMeshes) {
+            mesh.rotation.y = wireframe.rotation.y;
+        }
     }
-    animate();
+    renderer.render(scene, camera);
+}
+animate();
 
     // 7. Control de resolución
     window.addEventListener('resize', () => {
@@ -371,7 +410,8 @@ function startAutoRotate() {
     if (autoInterval) clearInterval(autoInterval);
     autoInterval = setInterval(() => {
         targetStep = (targetStep + 1) % 5;
-        targetRotation += (2 * Math.PI) / 5; // Suma siempre 72°
+        targetRotation += (2 * Math.PI) / 5;
+        animateToTarget(targetRotation);
     }, 1000); // 1000 ms = 1 segundo
 }
 
