@@ -80,17 +80,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('icosaedro-container');
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xefefef);
-    const aspect = container.clientWidth / container.clientHeight;
-const frustumSize = 2.5; // Ajusta este valor para el "zoom"
-const camera = new THREE.OrthographicCamera(
-    -frustumSize * aspect / 2, // left
-    frustumSize * aspect / 2,  // right
-    frustumSize / 2,           // top
-    -frustumSize / 2,          // bottom
-    0.1,                       // near
-    1000                       // far
-);
-camera.position.z = 3;
+    const camera = new THREE.PerspectiveCamera(
+        75,
+        container.clientWidth / container.clientHeight,
+        0.1,
+        1000
+    );
+    
+    camera.position.z = 3;
 
     const renderer = new THREE.WebGLRenderer({ 
         antialias: true,

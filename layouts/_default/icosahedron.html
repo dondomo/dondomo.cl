@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Icosaedro</title>
+  <title>Icosaedro Ortographic</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     html, body { margin: 0; padding: 0; width: 100vw; height: 100vh; }
@@ -73,26 +73,29 @@
 </button>
 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Configuración básica
     const container = document.getElementById('icosaedro-container');
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xefefef);
-    const camera = new THREE.PerspectiveCamera(
-        75,
-        container.clientWidth / container.clientHeight,
-        0.1,
-        1000
+
+    // --- CÁMARA ORTOGRÁFICA ---
+    const frustumSize = 3.5; // Ajusta este valor para acercar/alejar
+    function getAspect() {
+        return container.clientWidth / container.clientHeight;
+    }
+    let aspect = getAspect();
+    let camera = new THREE.OrthographicCamera(
+        -frustumSize * aspect / 2,  // left
+         frustumSize * aspect / 2,  // right
+         frustumSize / 2,           // top
+        -frustumSize / 2,           // bottom
+        0.1, 1000
     );
-    
     camera.position.z = 3;
 
-    const renderer = new THREE.WebGLRenderer({ 
-        antialias: true,
-        alpha: true
-    });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.appendChild(renderer.domElement);
 
@@ -402,7 +405,11 @@ animate();
 
     // 7. Control de resolución
     window.addEventListener('resize', () => {
-        camera.aspect = container.clientWidth / container.clientHeight;
+        aspect = getAspect();
+        camera.left = -frustumSize * aspect / 2;
+        camera.right = frustumSize * aspect / 2;
+        camera.top = frustumSize / 2;
+        camera.bottom = -frustumSize / 2;
         camera.updateProjectionMatrix();
         renderer.setSize(container.clientWidth, container.clientHeight);
     });
