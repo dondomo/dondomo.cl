@@ -22,9 +22,8 @@
       align-items: center;
       justify-content: center;
     }
-    #arrow-left { left: 45%; }   /* Centra horizontalmente */
-    #arrow-right { right: 45%; } /* Centra horizontalmente */
-
+    #arrow-left { left: 45%; }
+    #arrow-right { right: 45%; }
     #arrow-container {
       position: absolute;
       left: 0; right: 0; bottom: 40px;
@@ -33,22 +32,20 @@
       gap: 32px;
       z-index: 10;
     }
-
     @media (max-width: 1600px) {
-  .arrow-btn {
-    width: 96px;
-    height: 96px;
-  }
-  .arrow-btn svg {
-    width: 96px;
-    height: 96px;
-  }
-}
+      .arrow-btn {
+        width: 96px;
+        height: 96px;
+      }
+      .arrow-btn svg {
+        width: 96px;
+        height: 96px;
+      }
+    }
   </style>
 </head>
 <body>
 <div id="icosaedro-container" style="width: 100%; height: 100vh; position: relative;"></div>
-
 <div id="arrow-container">
   <button id="arrow-left" class="arrow-btn btn btn-dark" style="position:static;padding:0;">
     <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
@@ -63,34 +60,25 @@
     </svg>
   </button>
 </div>
-
-<!-- Flechas Bootstrap 
-<button id="arrow-left" class="arrow-btn btn btn-dark">
-  <span class="bi bi-chevron-left">&#8592;</span>
-</button>
-<button id="arrow-right" class="arrow-btn btn btn-dark">
-  <span class="bi bi-chevron-right">&#8594;</span>
-</button>
--->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Configuración básica
+    // --- Configuración básica ---
     const container = document.getElementById('icosaedro-container');
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xefefef);
 
-    // --- CÁMARA ORTOGRÁFICA ---
-    const frustumSize = 3.5; // Ajusta este valor para acercar/alejar
+    // --- Cámara ortográfica ---
+    const frustumSize = 3.5;
     function getAspect() {
         return container.clientWidth / container.clientHeight;
     }
     let aspect = getAspect();
     let camera = new THREE.OrthographicCamera(
-        -frustumSize * aspect / 2,  // left
-         frustumSize * aspect / 2,  // right
-         frustumSize / 2,           // top
-        -frustumSize / 2,           // bottom
+        -frustumSize * aspect / 2,
+         frustumSize * aspect / 2,
+         frustumSize / 2,
+        -frustumSize / 2,
         0.1, 1000
     );
     camera.position.z = 3;
@@ -99,10 +87,9 @@ document.addEventListener('DOMContentLoaded', () => {
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.appendChild(renderer.domElement);
 
-    // 2. Crear icosaedro
+    // --- Crear icosaedro ---
     const geometry = new THREE.IcosahedronGeometry(1, 0);
 
-    // Asegura que geometry.index exista
     if (!geometry.index) {
         const indices = [];
         for (let i = 0; i < geometry.attributes.position.count; i++) {
@@ -111,7 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
         geometry.setIndex(indices);
     }
 
-    // Encuentra el vértice más alto y más bajo en Y
     geometry.computeBoundingBox();
     const maxY = geometry.boundingBox.max.y;
     const minY = geometry.boundingBox.min.y;
@@ -150,30 +136,22 @@ document.addEventListener('DOMContentLoaded', () => {
         faceCenters.push({ index: i, center, verts: [a, b, c] });
     }
     faceCenters.sort((f1, f2) => Math.abs(f1.center.y) - Math.abs(f2.center.y));
-    // Filtra solo las caras centrales con la base abajo
-function isBaseDown(face) {
-    // Obtén los 3 vértices
-    const verts = face.verts.map(
-        vi => new THREE.Vector3(
-            geometry.attributes.position.getX(vi),
-            geometry.attributes.position.getY(vi),
-            geometry.attributes.position.getZ(vi)
-        )
-    );
-    // Ordena por Y descendente
-    verts.sort((a, b) => b.y - a.y);
-    // El vértice más alto debe estar claramente arriba de los otros dos
-    // (puedes ajustar el umbral si es necesario)
-    // El vértice más alto será la punta, los otros dos la base
-const sorted = verts.map((v, idx) => ({ v, idx }))
-    .sort((a, b) => b.v.y - a.v.y);
-    return sorted[0].v.y > sorted[1].v.y && sorted[0].v.y > sorted[2].v.y;
-}
-
-// Selecciona las 5 caras centrales con base abajo
-const centralFaces = faceCenters
-    .filter(isBaseDown)
-    .slice(0, 5);
+    function isBaseDown(face) {
+        const verts = face.verts.map(
+            vi => new THREE.Vector3(
+                geometry.attributes.position.getX(vi),
+                geometry.attributes.position.getY(vi),
+                geometry.attributes.position.getZ(vi)
+            )
+        );
+        verts.sort((a, b) => b.y - a.y);
+        const sorted = verts.map((v, idx) => ({ v, idx }))
+            .sort((a, b) => b.v.y - a.v.y);
+        return sorted[0].v.y > sorted[1].v.y && sorted[0].v.y > sorted[2].v.y;
+    }
+    const centralFaces = faceCenters
+        .filter(isBaseDown)
+        .slice(0, 5);
 
     // --- Wireframe para todo el icosaedro ---
     const wireframe = new THREE.Mesh(
@@ -194,96 +172,164 @@ const centralFaces = faceCenters
     const textureLoader = new THREE.TextureLoader();
     const centralMeshes = [];
 
-    for (let i = 0; i < 5; i++) {
-    const face = centralFaces[i];
-    const faceGeom = new THREE.BufferGeometry();
+    // --- VARIABLES GLOBALES PARA ANIMACIÓN ---
+    let autoRotate = true;
+    let pauseTimeout = null;
+    let animating = false;
+    let animationStart = 0;
+    let animationDuration = 600; // ms
+    let rotationFrom = 0;
+    let rotationTo = 0;
+    let targetStep = 0;
+    let targetRotation = 0;
+    let rotationOffset = 0;
 
-    // Posiciones de los 3 vértices
-    const positions = [];
-    for (const vi of face.verts) {
-        positions.push(
-            geometry.attributes.position.getX(vi),
-            geometry.attributes.position.getY(vi),
-            geometry.attributes.position.getZ(vi)
-        );
+    // Variables para transición suave
+    let fadingPair = null; // {from: index, to: index, start: timestamp, duration: ms}
+    let fadePairDuration = 800; // ms
+
+    // --- Estado de hover sobre flechas ---
+    let isArrowHovered = false;
+
+    function getStepAngle(step) {
+        const stepAngle = (2 * Math.PI) / 5;
+        return rotationOffset + step * stepAngle;
     }
-    faceGeom.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-    faceGeom.setIndex([0, 2, 1]);
-    faceGeom.computeVertexNormals();
 
-    // --- UVs: punta arriba, base abajo ---
-    // Obtén los 3 vértices de la cara
-    const verts = face.verts.map(
-        vi => new THREE.Vector3(
-            geometry.attributes.position.getX(vi),
-            geometry.attributes.position.getY(vi),
-            geometry.attributes.position.getZ(vi)
-        )
-    );
-    // Encuentra el índice del vértice más alto (punta)
-    let puntaIdx = 0;
-    if (verts[1].y > verts[puntaIdx].y) puntaIdx = 1;
-    if (verts[2].y > verts[puntaIdx].y) puntaIdx = 2;
-    // Los otros dos índices serán la base
-    const baseIdx1 = (puntaIdx + 1) % 3;
-    const baseIdx2 = (puntaIdx + 2) % 3;
-    // Asigna los UVs: punta arriba, base abajo
-const uvMap = [];
-uvMap[puntaIdx] = [0.5, 0]; // punta superior
-uvMap[baseIdx1] = [0, 1];   // base derecha
-uvMap[baseIdx2] = [1, 1];   // base izquierda
+    function getCurrentStep() {
+        const stepAngle = (2 * Math.PI) / 5;
+        let angle = ((wireframe.rotation.y - rotationOffset) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+        let step = Math.round(angle / stepAngle) % 5;
+        if (step < 0) step += 5;
+        return step;
+    }
 
-// INVIERTE el eje Y de los UVs para reflejar el texto
-for (let j = 0; j < 3; j++) {
-    uvMap[j][1] = 1 - uvMap[j][1];
-}
+    function startFadePair(fromIdx, toIdx) {
+        fadingPair = {
+            from: fromIdx,
+            to: toIdx,
+            start: performance.now(),
+            duration: fadePairDuration
+        };
+        centralMeshes[fromIdx].visible = true;
+        centralMeshes[toIdx].visible = true;
+        centralMeshes[fromIdx].material.opacity = 1;
+        centralMeshes[toIdx].material.opacity = 0;
+    }
 
-const uvs = new Float32Array([
-    uvMap[0][0], uvMap[0][1],
-    uvMap[1][0], uvMap[1][1],
-    uvMap[2][0], uvMap[2][1]
-]);
-faceGeom.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+    function animateToTargetStep(step) {
+        // Siempre parte desde el destino de la animación actual si está animando
+        let fromAngle = animating ? rotationTo : wireframe.rotation.y;
+        let toAngle = getStepAngle(step);
 
-    // Material con textura, sin luces
-    const texture = textureLoader.load(imagePaths[i]);
-    const mat = new THREE.MeshBasicMaterial({
-        map: texture,
-        side: THREE.DoubleSide,
-        transparent: true
-    });
+        // Cálculo de giro más corto (puede ser horario o antihorario)
+        let delta = ((toAngle - fromAngle + Math.PI) % (2 * Math.PI)) - Math.PI;
 
-    const mesh = new THREE.Mesh(faceGeom, mat);
+        animating = true;
+        animationStart = performance.now();
+        rotationFrom = fromAngle;
+        rotationTo = fromAngle + delta;
+        targetStep = step;
+        targetRotation = getStepAngle(step);
 
-    // Corrige la perspectiva: rota levemente sobre el eje X
-// Prueba con un valor pequeño, por ejemplo 0.07 radianes (~4 grados)
+        // Determina la cara de origen real
+        let prevStep = getCurrentStep();
+        startFadePair(prevStep, step);
 
-//mesh.rotation.x = 0.09;
+        // Pausa el auto-rotate y reinicia el timeout
+        autoRotate = false;
+        if (pauseTimeout) {
+            clearTimeout(pauseTimeout);
+            pauseTimeout = null;
+        }
+        if (!isArrowHovered) {
+            pauseTimeout = setTimeout(() => {
+                if (!isArrowHovered) {
+                    autoRotate = true;
+                    pauseTimeout = null;
+                }
+            }, 2000);
+        }
+    }
 
+    for (let i = 0; i < 5; i++) {
+        const face = centralFaces[i];
+        const faceGeom = new THREE.BufferGeometry();
 
-    scene.add(mesh);
-    centralMeshes.push(mesh);
-}
+        // Posiciones de los 3 vértices
+        const positions = [];
+        for (const vi of face.verts) {
+            positions.push(
+                geometry.attributes.position.getX(vi),
+                geometry.attributes.position.getY(vi),
+                geometry.attributes.position.getZ(vi)
+            );
+        }
+        faceGeom.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        faceGeom.setIndex([0, 2, 1]);
+        faceGeom.computeVertexNormals();
+
+        // --- UVs: punta arriba, base abajo ---
+        const verts = face.verts.map(
+            vi => new THREE.Vector3(
+                geometry.attributes.position.getX(vi),
+                geometry.attributes.position.getY(vi),
+                geometry.attributes.position.getZ(vi)
+            )
+        );
+        let puntaIdx = 0;
+        if (verts[1].y > verts[puntaIdx].y) puntaIdx = 1;
+        if (verts[2].y > verts[puntaIdx].y) puntaIdx = 2;
+        const baseIdx1 = (puntaIdx + 1) % 3;
+        const baseIdx2 = (puntaIdx + 2) % 3;
+        const uvMap = [];
+        uvMap[puntaIdx] = [0.5, 0];
+        uvMap[baseIdx1] = [0, 1];
+        uvMap[baseIdx2] = [1, 1];
+        for (let j = 0; j < 3; j++) {
+            uvMap[j][1] = 1 - uvMap[j][1];
+        }
+        const uvs = new Float32Array([
+            uvMap[0][0], uvMap[0][1],
+            uvMap[1][0], uvMap[1][1],
+            uvMap[2][0], uvMap[2][1]
+        ]);
+        faceGeom.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+
+        // Material con textura, sin luces
+        const texture = textureLoader.load(imagePaths[i]);
+        const mat = new THREE.MeshBasicMaterial({
+            map: texture,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0
+        });
+
+        const mesh = new THREE.Mesh(faceGeom, mat);
+        scene.add(mesh);
+        centralMeshes.push(mesh);
+    }
+
     // Calcular el ángulo necesario para alinear la primera cara central con la cámara
     const faceFront = centralFaces[0];
     const center = faceFront.center.clone().normalize();
-    const angleToZ = Math.atan2(center.x, center.z); // Ángulo en Y para alinear con Z
+    const angleToZ = Math.atan2(center.x, center.z);
 
     // Aplica la rotación inicial para alinear la cara frontal
-    wireframe.rotation.y = -angleToZ;
+    rotationOffset = -angleToZ;
+    wireframe.rotation.y = rotationOffset;
     for (const mesh of centralMeshes) {
-        mesh.rotation.y = -angleToZ;
+        mesh.rotation.y = rotationOffset;
     }
-    let targetRotation = -angleToZ;
+    targetRotation = rotationOffset;
+    rotationFrom = targetRotation;
+    rotationTo = targetRotation;
 
     // --- Raycaster y control de animación ---
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
     let hoveredFace = null;
-    let animationActive = true;
-    let autoStopped = false; // Para detener la animación automática para siempre
 
-    // --- Eventos de mouse ---
     renderer.domElement.addEventListener('mousemove', (event) => {
         const rect = renderer.domElement.getBoundingClientRect();
         mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -294,8 +340,6 @@ faceGeom.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
         for (let i = 0; i < centralMeshes.length; i++) {
             const intersects = raycaster.intersectObject(centralMeshes[i]);
             if (intersects.length > 0) {
-                animationActive = false;
-                autoStopped = true;
                 container.style.cursor = 'pointer';
                 hoveredFace = i;
                 found = true;
@@ -322,88 +366,142 @@ faceGeom.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
     // --- Flechas de navegación ---
     const arrowLeft = document.getElementById('arrow-left');
     const arrowRight = document.getElementById('arrow-right');
-    let targetStep = 0; // 0 a 4, cara central activa
-    let isDragging = false;
-    let lastX = 0;
 
-    // Inicializa targetRotation con la rotación actual
-    
-    for (const mesh of centralMeshes) {
-       
+    // Pausa auto-rotate al interactuar con las flechas
+    function pauseAutoRotateOnInteraction() {
+        isArrowHovered = true;
+        autoRotate = false;
+        if (pauseTimeout) {
+            clearTimeout(pauseTimeout);
+            pauseTimeout = null;
+        }
     }
-   
+    function resumeAutoRotateAfterDelay() {
+        isArrowHovered = false;
+        if (!animating) {
+            if (pauseTimeout) clearTimeout(pauseTimeout);
+            pauseTimeout = setTimeout(() => {
+                if (!isArrowHovered) {
+                    autoRotate = true;
+                    pauseTimeout = null;
+                }
+            }, 2000);
+        }
+    }
 
-    // Al hacer click en las flechas, suma o resta 72° al targetRotation
+    arrowLeft.addEventListener('mouseenter', pauseAutoRotateOnInteraction);
+    arrowRight.addEventListener('mouseenter', pauseAutoRotateOnInteraction);
+    arrowLeft.addEventListener('mouseleave', resumeAutoRotateAfterDelay);
+    arrowRight.addEventListener('mouseleave', resumeAutoRotateAfterDelay);
+
     arrowLeft.addEventListener('click', () => {
-        if (autoInterval) clearInterval(autoInterval);
-        targetStep = (targetStep - 1 + 5) % 5;
-        targetRotation -= (2 * Math.PI) / 5;
-        animateToTarget(targetRotation);
-        animationActive = false;
-        autoStopped = true;
+        pauseAutoRotateOnInteraction();
+        let nextStep = (getCurrentStep() - 1 + 4) % 5;
+        animateToTargetStep(nextStep);
     });
     arrowRight.addEventListener('click', () => {
-        targetStep = (targetStep + 1) % 5;
-        targetRotation += (2 * Math.PI) / 5;
-        animateToTarget(targetRotation);
-        animationActive = false;
-        autoStopped = true;
+        pauseAutoRotateOnInteraction();
+        let nextStep = (getCurrentStep() + 2) % 5;
+        animateToTargetStep(nextStep);
     });
 
+    function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+    }
 
-
-    // Permitir arrastrar para rotar el icosaedro
-
-    // --- Animación modificada para rotar suavemente hacia targetRotation ---
-    let animating = false;
-let animationStart = 0;
-let animationDuration = 600; // ms
-let rotationFrom = targetRotation;
-let rotationTo = targetRotation;
-
-function easeOutCubic(t) {
-    return 1 - Math.pow(1 - t, 3);
-}
-
-function animateToTarget(newTarget) {
-    animating = true;
-    animationStart = performance.now();
-    rotationFrom = wireframe.rotation.y;
-    // Corrige saltos de más de PI (giro más corto)
-    let delta = ((newTarget - rotationFrom + Math.PI) % (2 * Math.PI)) - Math.PI;
-    rotationTo = rotationFrom + delta;
-}
-
-function animate() {
-    requestAnimationFrame(animate);
-
-    if (animating) {
-        let now = performance.now();
-        let t = Math.min(1, (now - animationStart) / animationDuration);
-        let eased = easeOutCubic(t);
-        wireframe.rotation.y = rotationFrom + (rotationTo - rotationFrom) * eased;
-        for (const mesh of centralMeshes) {
-            mesh.rotation.y = wireframe.rotation.y;
-        }
-        if (t >= 1) {
-            animating = false;
-            wireframe.rotation.y = rotationTo;
-            for (const mesh of centralMeshes) {
-                mesh.rotation.y = wireframe.rotation.y;
+    function updateCentralFacesVisibility() {
+        if (fadingPair) {
+            for (let i = 0; i < centralMeshes.length; i++) {
+                centralMeshes[i].visible = (i === fadingPair.from || i === fadingPair.to);
+            }
+        } else {
+            let step = getCurrentStep();
+            for (let i = 0; i < centralMeshes.length; i++) {
+                centralMeshes[i].visible = (i === step);
+                centralMeshes[i].material.opacity = (i === step) ? 1 : 0;
             }
         }
-    } else {
-        // Si no está animando, asegúrate de que la rotación esté en targetRotation
-        wireframe.rotation.y = targetRotation;
-        for (const mesh of centralMeshes) {
-            mesh.rotation.y = wireframe.rotation.y;
-        }
     }
-    renderer.render(scene, camera);
-}
-animate();
 
-    // 7. Control de resolución
+    function animate() {
+        requestAnimationFrame(animate);
+
+        // Animación automática: solo si no está animando ni en pausa ni con hover en flechas
+        if (autoRotate && !animating && !pauseTimeout && !isArrowHovered) {
+            let prevStep = getCurrentStep();
+            let nextStep = (prevStep + 1) % 5;
+            let fromAngle = getStepAngle(prevStep);
+            let toAngle = getStepAngle(nextStep);
+
+            // Avanza siempre un paso exacto en sentido horario
+            let delta = ((toAngle - fromAngle + 2 * Math.PI) % (2 * Math.PI));
+            if (delta === 0) delta = (2 * Math.PI) / 5; // fallback por si acaso
+
+            animating = true;
+            animationStart = performance.now();
+            rotationFrom = fromAngle;
+            rotationTo = fromAngle + delta;
+            targetStep = nextStep;
+            targetRotation = getStepAngle(nextStep);
+            startFadePair(prevStep, nextStep);
+
+            autoRotate = false;
+        }
+
+        if (animating) {
+            let now = performance.now();
+            let t = Math.min(1, (now - animationStart) / animationDuration);
+            let eased = easeOutCubic(t);
+            let currentRotation = rotationFrom + (rotationTo - rotationFrom) * eased;
+            wireframe.rotation.y = currentRotation;
+            for (const mesh of centralMeshes) {
+                mesh.rotation.y = currentRotation;
+            }
+            if (fadingPair) {
+                let tfade = Math.min(1, (now - fadingPair.start) / fadingPair.duration);
+                centralMeshes[fadingPair.from].material.opacity = 1 - tfade;
+                centralMeshes[fadingPair.to].material.opacity = tfade;
+            }
+            if (t >= 1) {
+                animating = false;
+                if (fadingPair) {
+                    centralMeshes[fadingPair.from].material.opacity = 0;
+                    centralMeshes[fadingPair.to].material.opacity = 1;
+                    centralMeshes[fadingPair.from].visible = false;
+                    fadingPair = null;
+                }
+                // Fuerza la rotación final exacta usando targetStep
+                let finalAngle = getStepAngle(targetStep);
+                wireframe.rotation.y = finalAngle;
+                for (const mesh of centralMeshes) {
+                    mesh.rotation.y = finalAngle;
+                }
+                // Pausa automática
+                if (!pauseTimeout && !isArrowHovered) {
+                    pauseTimeout = setTimeout(() => {
+                        if (!isArrowHovered) {
+                            autoRotate = true;
+                            pauseTimeout = null;
+                        }
+                    }, 2000);
+                }
+            }
+        } else {
+            let step = getCurrentStep();
+            let angle = getStepAngle(step);
+            wireframe.rotation.y = angle;
+            for (const mesh of centralMeshes) {
+                mesh.rotation.y = angle;
+            }
+        }
+
+        updateCentralFacesVisibility();
+        renderer.render(scene, camera);
+    }
+
+    animate();
+
+    // --- Control de resolución ---
     window.addEventListener('resize', () => {
         aspect = getAspect();
         camera.left = -frustumSize * aspect / 2;
@@ -413,60 +511,6 @@ animate();
         camera.updateProjectionMatrix();
         renderer.setSize(container.clientWidth, container.clientHeight);
     });
-
-    function rotateToStep(step) {
-        // Calcula la diferencia de pasos
-        let diff = ((step - targetStep + 5) % 5);
-        if (diff > 2) diff -= 5; // Siempre el camino más corto, pero en pasos de 72°
-        targetStep = (step + 5) % 5;
-        targetRotation += diff * ((2 * Math.PI) / 5);
-    }
-
-    let autoInterval = null;
-
-function startAutoRotate() {
-    if (autoInterval) clearInterval(autoInterval);
-    autoInterval = setInterval(() => {
-        targetStep = (targetStep + 1) % 5;
-        targetRotation += (2 * Math.PI) / 5;
-        animateToTarget(targetRotation);
-    }, 1000); // 1000 ms = 1 segundo
-}
-
-// Inicia la animación automática
-startAutoRotate();
-
-// --- Detener y reanudar animación automática con mouseover/mouseout ---
-
-function stopAutoRotate() {
-    if (autoInterval) clearInterval(autoInterval);
-}
-
-function resumeAutoRotate() {
-    startAutoRotate();
-}
-
-// Flechas
-arrowLeft.addEventListener('mouseenter', stopAutoRotate);
-arrowRight.addEventListener('mouseenter', stopAutoRotate);
-arrowLeft.addEventListener('mouseleave', resumeAutoRotate);
-arrowRight.addEventListener('mouseleave', resumeAutoRotate);
-
-// Botones (caras centrales)
-for (const mesh of centralMeshes) {
-    mesh.onBeforeRender = function() {
-        this.userData._raycasted = false;
-    };
-}
-renderer.domElement.addEventListener('mousemove', (event) => {
-    // ...tu código de raycasting...
-    // Si hoveredFace !== null, detener animación automática
-    if (hoveredFace !== null) {
-        stopAutoRotate();
-    } else {
-        resumeAutoRotate();
-    }
-});
 });
 </script>
 </body>
