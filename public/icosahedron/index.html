@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const wireframe = new THREE.Mesh(
         geometry,
-        new THREE.MeshBasicMaterial({ color: 0x990000, wireframe: true })
+        new THREE.MeshBasicMaterial({ color: 0xaa0000, wireframe: true })
     );
     scene.add(wireframe);
 
@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let animating = false;
     let animationStart = 0;
     let animationDurationAuto = 1600; 
-    let animationDurationManual = 2600; 
+    let animationDurationManual = 2000; 
     let animationDuration = animationDurationAuto; 
     let rotationFrom = 0;
     let rotationTo = 0;
