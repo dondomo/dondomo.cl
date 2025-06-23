@@ -177,7 +177,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let pauseTimeout = null;
     let animating = false;
     let animationStart = 0;
-    let animationDuration = 600; // ms
+    let animationDurationAuto = 1600; // ms (o el valor que prefieras)
+    let animationDurationManual = 2600; // ms (más lento)
+    let animationDuration = animationDurationAuto; // valor por defecto
     let rotationFrom = 0;
     let rotationTo = 0;
     let targetStep = 0;
@@ -186,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Variables para transición suave
     let fadingPair = null; // {from: index, to: index, start: timestamp, duration: ms}
-    let fadePairDuration = 800; // ms
+    let fadePairDuration = 1600; // ms
 
     // --- Estado de hover sobre flechas ---
     let isArrowHovered = false;
@@ -217,13 +219,20 @@ document.addEventListener('DOMContentLoaded', () => {
         centralMeshes[toIdx].material.opacity = 0;
     }
 
-    function animateToTargetStep(step) {
-        // Siempre parte desde el destino de la animación actual si está animando
+    function animateToTargetStep(step, direction = 'shortest') {
         let fromAngle = animating ? rotationTo : wireframe.rotation.y;
         let toAngle = getStepAngle(step);
+        let delta;
 
-        // Cálculo de giro más corto (puede ser horario o antihorario)
-        let delta = ((toAngle - fromAngle + Math.PI) % (2 * Math.PI)) - Math.PI;
+        if (direction === 'cw') { // sentido horario
+            delta = ((toAngle - fromAngle + 2 * Math.PI) % (2 * Math.PI));
+            if (delta === 0) delta = (2 * Math.PI) / 5;
+        } else if (direction === 'ccw') { // sentido antihorario
+            delta = ((toAngle - fromAngle - 2 * Math.PI) % (2 * Math.PI));
+            if (delta === 0) delta = -(2 * Math.PI) / 5;
+        } else { // más corto
+            delta = ((toAngle - fromAngle + Math.PI) % (2 * Math.PI)) - Math.PI;
+        }
 
         animating = true;
         animationStart = performance.now();
@@ -232,11 +241,9 @@ document.addEventListener('DOMContentLoaded', () => {
         targetStep = step;
         targetRotation = getStepAngle(step);
 
-        // Determina la cara de origen real
         let prevStep = getCurrentStep();
         startFadePair(prevStep, step);
 
-        // Pausa el auto-rotate y reinicia el timeout
         autoRotate = false;
         if (pauseTimeout) {
             clearTimeout(pauseTimeout);
@@ -396,18 +403,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     arrowLeft.addEventListener('click', () => {
         pauseAutoRotateOnInteraction();
-        let nextStep = (getCurrentStep() - 1 + 4) % 5;
-        animateToTargetStep(nextStep);
+        animationDuration = animationDurationManual;
+        let nextStep = (getCurrentStep() - 1 + 5) % 5;
+        animateToTargetStep(nextStep, 'ccw'); // fuerza antihorario
     });
     arrowRight.addEventListener('click', () => {
         pauseAutoRotateOnInteraction();
-        let nextStep = (getCurrentStep() + 2) % 5;
-        animateToTargetStep(nextStep);
+        animationDuration = animationDurationManual;
+        let nextStep = (getCurrentStep() + 1) % 5;
+        animateToTargetStep(nextStep, 'cw'); // fuerza horario
     });
 
-    function easeOutCubic(t) {
-        return 1 - Math.pow(1 - t, 3);
-    }
+    function easeInOutCubic(t) {
+        return t < 0.5
+            ? 4 * t * t * t
+            : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
 
     function updateCentralFacesVisibility() {
         if (fadingPair) {
@@ -428,6 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Animación automática: solo si no está animando ni en pausa ni con hover en flechas
         if (autoRotate && !animating && !pauseTimeout && !isArrowHovered) {
+            animationDuration = animationDurationAuto;
             let prevStep = getCurrentStep();
             let nextStep = (prevStep + 1) % 5;
             let fromAngle = getStepAngle(prevStep);
@@ -451,7 +463,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (animating) {
             let now = performance.now();
             let t = Math.min(1, (now - animationStart) / animationDuration);
-            let eased = easeOutCubic(t);
+           let eased = easeInOutCubic(t);
             let currentRotation = rotationFrom + (rotationTo - rotationFrom) * eased;
             wireframe.rotation.y = currentRotation;
             for (const mesh of centralMeshes) {
