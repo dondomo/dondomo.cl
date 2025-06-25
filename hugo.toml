@@ -1,3 +1,88 @@
-baseURL = 'https://example.org/'
-languageCode = 'en-us'
-title = 'My New Hugo Site'
+#baseURL = "https://dondomo.cl/"
+baseURL = "http://localhost:1313/"
+languageCode = "es-cl"
+defaultContentLanguage = "es"
+title =  "dondomo"
+
+# Parámetros globales
+[params]
+  companyName = "DESMONTABLES S.A. - DONDOMO"
+  companyShortName = "dondomo" # Versión abreviada para móviles
+  companyEmail = "info@dondomo.cl"
+  companyPhone = "+56 2 227170836"
+  companyAddress = "Manuel Antonio Tocornal #1483, Santiago, Chile"
+  
+  
+  # Redes sociales
+  instagram = "https://instagram.com/dondomo"
+  facebook = "https://facebook.com/dondomo.cl"
+  
+  
+  # SEO
+  description = "Diseño, ingeniería y fabricación de cubiertas textiles, domos y refugios. En Santiago de Chile"
+  ogImage = "images/og-image.jpg"
+  
+  # Header CTA
+  [params.headerCTA]
+    text = "Cotizar ahora"
+    url = "/contacto"
+
+  [params.favicon]
+    apple_touch = "favicon/apple-touch-icon.png"
+    svg_icon = "favicon/favicon.svg"
+    ico = "favicon/favicon.ico"
+    png = [
+        { size = "16x16", file = "favicon/favicon-16x16.png" },
+        { size = "32x32", file = "favicon/favicon-32x32.png" },
+        { size = "96x96", file = "favicon/favicon-96x96.png" }
+    ]
+    android = [
+        { size = "192x192", file = "favicon/android-chrome-192x192.png" },
+        { size = "512x512", file = "favicon/android-chrome-512x512.png" }
+    ]
+    webmanifest = "favicon/site.webmanifest"
+    browserconfig = "favicon/browserconfig.xml"
+    theme_color = "#ffffff"
+
+# Menú principal
+[[menu.main]]
+  name = "Inicio"
+  url = "/"
+  weight = 1
+
+[[menu.main]]
+  name = "Somos"
+  url = "/somos"
+  weight = 2 
+
+[[menu.main]]
+  name = "Catalogo"
+  url = "/catalogo"
+  weight = 3
+
+[[menu.main]]
+  name = "Proyectos"
+  url = "/proyectos"
+  weight = 4
+
+[[menu.main]]
+  name = "Proyectos Especiales"
+  url = "/especiales"
+  weight = 4
+
+[[menu.main]]
+  name = "Contacto"
+  url = "/contacto"
+  weight = 6
+
+# Configuración de imagen (opcional)
+[imaging]
+  quality = 85
+  resampleFilter = "CatmullRom"
+
+# Configuración de caché (opcional)
+[caches]
+  [caches.getjson]
+    maxAge = "10m"
+  [caches.getcsv]
+    maxAge = "30m"

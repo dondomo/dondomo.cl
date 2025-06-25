@@ -1,6 +1,7 @@
 +++
-title = 'Catalogo'
+title = 'Catalogo Domos Geodésicos'
 layout = 'catalogo'
+type = 'catalogo'
 +++
 
 **Características comunes:**

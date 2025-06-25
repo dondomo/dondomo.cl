@@ -1,0 +1,18 @@
+<header class="container-fluid bg-white shadow-sm py-3">
+  <div class="container">
+    <div class="row align-items-center justify-content-center">
+      <div class="col-auto">
+        <!-- Logo como enlace al inicio -->
+        <a href="{{ .Site.BaseURL }}" class="d-inline-block mx-auto">
+          <img 
+            src="{{ "images/logo/dondomo.webp" | absURL }}" 
+            alt="{{ .Site.Title }}" 
+            class="img-fluid d-block mx-auto"
+            style="max-height: 60px;"
+            loading="lazy"
+          >
+        </a>
+      </div>
+    </div>
+  </div>
+</header>

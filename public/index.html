@@ -1,749 +1,662 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-	<meta name="generator" content="Hugo 0.145.0">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>cielo.ovh</title>
-    <link rel="stylesheet" href="css/style.css">
-    
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: #D2D2D2;
-        }
-        
-         
-        #background-layer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;  
-            background-image: url('/images/bg-game.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-        }
-        
-         
-        #dome-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            pointer-events: none;
-        }
-        
-         
-        #canvas1 {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;  
-        }
-            
-         
-        .hex-menu-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 250px;  
-            overflow: visible;  
-            z-index: 100;
-            transition: all 0.5s ease;
-        }
-        .hex-menu {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            transition: all 0.5s ease;
-        }
-        .hex-menu-container.collapsed {
-            height: 70px;
-        }
-        .hex-menu-container.collapsed .hex-menu {
-            top: -50px;
-        }
-        .hex-menu-container.collapsed ~ .main-container {
-            transform: translateY(0);
-        }
-        .hex-menu-container:not(.collapsed) ~ .main-container {
-            transform: translateY(200px);  
-        }
+<html lang="es-cl">
+  <head>
+	<meta name="generator" content="Hugo 0.145.0"><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  
+  <title>dondomo</title>
+  
+  
+  <meta name="description" content="Diseño, ingeniería y fabricación de cubiertas textiles, domos y refugios. En Santiago de Chile">
+  
+  
 
-        .hex-main {
-            width: 120px;
-            height: 140px;
-            background-color: transparent;
-            background-image: url('/images/brocoli.png');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: transparent;
-            font-weight: bold;
-            cursor: pointer;
-            position: relative;
-            z-index: 10;
-        }
+<link rel="apple-touch-icon" sizes="180x180" href="http://localhost:1313/favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="96x96" href="http://localhost:1313/favicon/favicon-96x96.png">
+<link rel="manifest" href="http://localhost:1313/favicon/site.webmanifest">
+<link rel="shortcut icon" href="http://localhost:1313/favicon/favicon.ico">
 
-        .hex-item {
-            width: 80px;
-            height: 90px;
-            background: linear-gradient(135deg, #8ce7eaa3, #bbb5ce);
-            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-            position: absolute;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 0.8em;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            opacity: 0;
-            z-index: 5;
-            transform-origin: center;
-            text-align: center;
-            padding: 5px;
-            box-sizing: border-box;
-        }
 
-        .hex-menu-container:not(.collapsed) .hex-item {
-            opacity: 1;
-        }
+<link rel="icon" href="http://localhost:1313/favicon/favicon.svg" type="image/svg+xml">
 
-        .hex-item:nth-child(2) {
-            transform: translate(-90px, -115px);
-        }
-        .hex-item:nth-child(3) {
-            transform: translate(130px, -115px);
-        }
-        .hex-item:nth-child(4) {
-            transform: translate(75px, 90px);
-        }
-        .hex-item:nth-child(5) {
-            transform: translate(-35px, 90px);
-        }
-        .hex-item:hover {
-            background: linear-gradient(135deg, #ffffff, #c8bab9);
-            transform: scale(1.1) translate(var(--tx), var(--ty)) !important;
-            z-index: 15;
-            filter: drop-shadow(0 0 5px rgba(0,0,0,0.3));
-            color: #2c3e50;
-        }
-        .hex-item:nth-child(2):hover {
-            --tx: -85px;
-            --ty: -115px;
-        }
-        .hex-item:nth-child(3):hover {
-            --tx: 125px;
-            --ty: -115px;
-        }
-        .hex-item:nth-child(4):hover {
-            --tx: 75px;
-            --ty: 90px;
-        }
-        .hex-item:nth-child(5):hover {
-            --tx: -35px;
-            --ty: 90px;
-        }
 
-         
-        .feature-section {
-            margin-bottom: 20px;
-        }
-        .feature-section h3 {
-            color: #2c3e50;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
-        }
-        .feature-item {
-            margin: 10px 0;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-            border-left: 3px solid #5f7b8fb9;
-        }
-        .feature-title {
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .feature-value {
-            color: #555;
-        }
-        .specs-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-top: 15px;
-        }
+<link rel="icon" type="image/png" sizes="192x192" href="http://localhost:1313/favicon/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="http://localhost:1313/favicon/android-chrome-512x512.png">
 
-         
-        .hex-menu-container {
-            height: 70px;
-        }
-        .hex-menu-container:hover {
-            height: 250px;
-        }
-        .hex-menu-container:hover .hex-menu {
-            top: 20px;
-        }
-        .hex-menu-container:hover ~ .main-container {
-            transform: translateY(200px);
-        }
-        .hex-menu-container.collapsed:hover {
-            height: 250px;
-        }
-        .hex-menu-container.collapsed:hover .hex-menu {
-            top: 20px;
-        }
-        .hex-menu-container.collapsed:hover ~ .main-container {
-            transform: translateY(200px);
-        }
-                 
-        #rabbit-container {
-            position: fixed;
-            bottom: 10px;
-            left: 0;
-            width: 100%;
-            height: 100px;
-            overflow: hidden;
-            z-index: 50;
-            display: none;  
-        }
 
-        #running-rabbit {
-            position: absolute;
-            bottom: 0;
-            left: -200px;  
-            width: 200px;
-            height: 100px;
-            background-image: url('/images/conejo.gif');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            z-index: 50;
-        }
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-config" content="http://localhost:1313/favicon/browserconfig.xml">
+<meta name="theme-color" content="#ffffff">
+
+
+<link rel="manifest" href="http://localhost:1313/favicon/site.webmanifest">
+
+  
+  <meta property="og:title" content="dondomo">
+  <meta property="og:description" content="Diseño, ingeniería y fabricación de cubiertas textiles, domos y refugios. En Santiago de Chile">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="http://localhost:1313/">
+  <meta property="og:image" content="http://localhost:1313/images/og-image.jpg">
+
+  
+  <link rel="canonical" href="http://localhost:1313/">
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  
+  
+  <link rel="stylesheet" href="http://localhost:1313/css/main.min.ec791886f3be40b5bab2b8cf9800bb8278a1f1b0197827094b56910124e235c4.css">
 
     
-#cat-computer-container {
-    position: fixed;
-    bottom: 15%;
-    right: 55%;
-    width: 280px;
-    height: 210px;
-    z-index: 40;
-    display: none;  
-    pointer-events: none;
-}
-
-#computer-cat {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-     
-    @media (max-width: 768px) {
-        #cat-computer-container {
-            width: 180px;   
-            height: 135px;
-            bottom: 10%;   
-            right: 50%;     
-            transform: translateX(50%);  
-            z-index: 40;   
-        }
-    }
-
-     
-    @media (max-width: 480px) {
-        #cat-computer-container {
-            width: 150px;
-            height: 112px;
-            bottom: 5%;
-        }
-    }
+<link rel="stylesheet" href="http://localhost:1313/css/footer.min.0882031966768036fea8c3823a7ed6524110f0a4aea28f39d308dac368b6bdda.css">
 
 
-         
-        #radio-player {
-            display: none;
-        }
 
-         
-        #mute-button {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            background: rgba(0,0,0,0.5);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
-            display: none;  
-        }
-             
-        #mobile-audio-permission {
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            z-index: 1000;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            border: none;
-            border-radius: 20px;
-            padding: 10px 15px;
-            font-size: 14px;
-            display: none;
-        }
-    </style>
-<body>
+
+
+  
+  <link rel="preload" href="http://localhost:1313/css/main.min.ec791886f3be40b5bab2b8cf9800bb8278a1f1b0197827094b56910124e235c4.css" as="style">
+
+  
+  
+
+  
+  <link rel="alternate" type="application/rss+xml" href="http://localhost:1313/index.xml" title="dondomo" />
+  </head>
+  <body>
+    <header class="container-fluid bg-white shadow-sm py-3">
+  <div class="container">
+    <div class="row align-items-center justify-content-center">
+      <div class="col-auto">
         
-    <div id="background-layer"></div>
+        <a href="http://localhost:1313/" class="d-inline-block mx-auto">
+          <img 
+            src="http://localhost:1313/images/logo/dondomo.webp" 
+            alt="dondomo" 
+            class="img-fluid d-block mx-auto"
+            style="max-height: 60px;"
+            loading="lazy"
+          >
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
+    <main>
+      
+  
+  
+  
+  <div class="homepage-content">
+    
+  </div>
 
-<div id="cat-computer-container" style="display:none;">
-    <img id="computer-cat" src="/images/cat-computer.gif" style="width:100%;height:100%;object-fit:contain;">
+  
+  
+<link rel="stylesheet" href="http://localhost:1313/css/icosahedron.min.b62a8f8fec5c2dfd5999c1ab02bc7ba7b6c48fa4b7609f2b363632eee609cdb9.css">
+
+<div id="icosahedron-flex-container">
+  <button id="arrow-left" class="arrow-btn btn btn-dark">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+      <circle cx="24" cy="24" r="23" stroke="#fff" stroke-width="2" fill="rgba(0,0,0,0.5)"/>
+      <polyline points="28,14 18,24 28,34" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  <div id="icosaedro-container"></div>
+  <button id="arrow-right" class="arrow-btn btn btn-dark">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+      <circle cx="24" cy="24" r="23" stroke="#fff" stroke-width="2" fill="rgba(0,0,0,0.5)"/>
+      <polyline points="20,14 30,24 20,34" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
 </div>
-    </div>
-    <div id="dome-container"></div> 
-    <canvas id="canvas1"></canvas> 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
     
-  
-    <div class="hex-menu-container collapsed" id="hexMenuContainer">
-        <div class="hex-menu">
-            <div class="hex-main" id="rabbitButton">-_-</div>
-        </div>
-    </div>
-
-
+    const container = document.getElementById('icosaedro-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xefefef);
 
     
-    <div id="rabbit-container">
-        <div id="running-rabbit"></div>
-    </div>
-
-        
-    <audio id="radio-player" crossorigin="anonymous"></audio>
-    
-    
-    <button id="mute-button">🔇</button>
-    
-    
-    <script>
-  
-
-const canvas = document.getElementById('canvas1');
-const ctx = canvas.getContext('2d');
-const rabbitButton = document.getElementById('rabbitButton');
-const rabbitContainer = document.getElementById('rabbit-container');
-const runningRabbit = document.getElementById('running-rabbit');
-const catComputerContainer = document.getElementById('cat-computer-container');
-const radioPlayer = document.getElementById('radio-player');
-const muteButton = document.getElementById('mute-button');
-const mobilePermissionBtn = document.getElementById('mobile-audio-permission');
-
-
-let particlesArray = [];
-let isRabbitRunning = false;
-let rabbitAnimationId = null;
-let isRadioPlaying = false;
-let catAnimationId = null;
-let catPosition = 0;
-const catSpeed = 1;
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-const bgColor = 'rgb(0, 0, 0)';
-const particleColors = [
-    'rgba(255, 255, 255, 1)',
-    'rgba(230, 230, 230, 1)',
-    'rgba(210, 210, 210, 1)'
-];
-
-
-function initCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    initParticles();
-    animateParticles();
-}
-
-function initParticles() {
-    for (let i = 0; i < 50; i++) {
-        particlesArray.push(new Particle());
+    const frustumSize = 3.5;
+    function getAspect() {
+        return container.clientWidth / container.clientHeight;
     }
-}
+    let aspect = getAspect();
+    let camera = new THREE.OrthographicCamera(
+        -frustumSize * aspect / 2,
+         frustumSize * aspect / 2,
+         frustumSize / 2,
+        -frustumSize / 2,
+        0.1, 1000
+    );
+    camera.position.z = 3;
 
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(renderer.domElement);
 
-class Particle {
-    constructor() {
-        this.reset();
-        this.phase = Math.random() * Math.PI * 2;
-        this.sizeVariation = Math.random() * 0.1 + 0.95;
-    }
-    
-    reset() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.baseSize = Math.random() * 4 + 2;
-        this.size = this.baseSize;
-        this.speedX = Math.random() * 2 - 1;
-        this.speedY = Math.random() * 2 - 1;
-        this.color = particleColors[Math.floor(Math.random() * particleColors.length)];
-        this.maxLife = Math.random() * 500 + 300;
-        this.life = 0;
-    }
-    
-    update() {
-        this.phase += 0.02;
-        const moveX = Math.cos(this.phase * 1.3) * 0.7;
-        const moveY = Math.sin(this.phase * 1.7) * 0.7;
-        
-        this.x += this.speedX + moveX;
-        this.y += this.speedY + moveY;
-        
-        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-        
-        this.size = this.baseSize * (0.7 + Math.sin(this.phase * 3) * 0.3 * this.sizeVariation);
-        this.life++;
-        if (this.life > this.maxLife) this.reset();
-    }
-    
-    draw() {
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = `rgba(150, 150, 150, 0.3)`;
-        ctx.lineWidth = 0.5;
-        ctx.stroke();
-    }
-}
+    renderer.domElement.style.width = "100%";
+    renderer.domElement.style.height = "100%";
+    renderer.domElement.style.display = "block";
 
-function handleConnections() {
-    const maxDistance = 300;
-    ctx.lineWidth = 0.2;
     
-    for (let i = 0; i < particlesArray.length; i++) {
-        for (let j = i + 1; j < particlesArray.length; j++) {
-            const dx = particlesArray[i].x - particlesArray[j].x;
-            const dy = particlesArray[i].y - particlesArray[j].y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            
-            if (distance < maxDistance) {
-                const strength = 1 - (distance / maxDistance);
-                ctx.beginPath();
-                ctx.strokeStyle = `rgba(255, 255, 255, ${strength * 0.7})`;
-                ctx.lineWidth = strength * 1.2;
-                ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
-                ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
-                ctx.stroke();
+    window.renderer = renderer;
+    window.camera = camera;
+
+    
+    const geometry = new THREE.IcosahedronGeometry(1, 0);
+
+    if (!geometry.index) {
+        const indices = [];
+        for (let i = 0; i < geometry.attributes.position.count; i++) {
+            indices.push(i);
+        }
+        geometry.setIndex(indices);
+    }
+
+    geometry.computeBoundingBox();
+    const maxY = geometry.boundingBox.max.y;
+    const minY = geometry.boundingBox.min.y;
+    const centerY = (maxY + minY) / 2;
+    geometry.translate(0, -centerY, 0);
+
+    
+    let topVertex = null;
+    let minDist = Infinity;
+    for (let i = 0; i < geometry.attributes.position.count; i++) {
+        const x = geometry.attributes.position.getX(i);
+        const y = geometry.attributes.position.getY(i);
+        const z = geometry.attributes.position.getZ(i);
+        const dist = Math.sqrt(x * x + (y - (maxY - centerY)) ** 2 + z * z);
+        if (dist < minDist) {
+            minDist = dist;
+            topVertex = new THREE.Vector3(x, y, z);
+        }
+    }
+    const up = new THREE.Vector3(0, 1, 0);
+    const axis = new THREE.Vector3().crossVectors(topVertex, up).normalize();
+    const angle = topVertex.angleTo(up);
+    geometry.applyMatrix4(new THREE.Matrix4().makeRotationAxis(axis, angle));
+
+    
+    const faceCount = geometry.index.count / 3;
+    const faceCenters = [];
+    for (let i = 0; i < faceCount; i++) {
+        const a = geometry.index.getX(i * 3);
+        const b = geometry.index.getX(i * 3 + 1);
+        const c = geometry.index.getX(i * 3 + 2);
+        const vA = new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, a);
+        const vB = new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, b);
+        const vC = new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, c);
+        const center = new THREE.Vector3().addVectors(vA, vB).add(vC).divideScalar(3);
+        faceCenters.push({ index: i, center, verts: [a, b, c] });
+    }
+    faceCenters.sort((f1, f2) => Math.abs(f1.center.y) - Math.abs(f2.center.y));
+    function isBaseDown(face) {
+        const verts = face.verts.map(
+            vi => new THREE.Vector3(
+                geometry.attributes.position.getX(vi),
+                geometry.attributes.position.getY(vi),
+                geometry.attributes.position.getZ(vi)
+            )
+        );
+        verts.sort((a, b) => b.y - a.y);
+        const sorted = verts.map((v, idx) => ({ v, idx }))
+            .sort((a, b) => b.v.y - a.v.y);
+        return sorted[0].v.y > sorted[1].v.y && sorted[0].v.y > sorted[2].v.y;
+    }
+    const centralFaces = faceCenters
+        .filter(isBaseDown)
+        .slice(0, 5);
+
+    
+    const wireframe = new THREE.Mesh(
+        geometry,
+        new THREE.MeshBasicMaterial({ color: 0xaa0000, wireframe: true })
+    );
+    scene.add(wireframe);
+
+    
+    const imagePaths = [
+        '/images/menu/somos.webp',
+        '/images/menu/catalogo.webp',
+        '/images/menu/proyectos.webp',
+        '/images/menu/especiales.webp',
+        '/images/menu/contacto.webp',
+    ];
+
+    const sectionLinks = [
+        '/somos/',
+        '/catalogo/',
+        '/projectos/',
+        '/especiales/',
+        '/contacto/'
+    ];
+
+    const textureLoader = new THREE.TextureLoader();
+    const centralMeshes = [];
+
+    
+    let autoRotate = true;
+    let pauseTimeout = null;
+    let animating = false;
+    let animationStart = 0;
+    let animationDurationAuto = 1600; 
+    let animationDurationManual = 2000; 
+    let animationDuration = animationDurationAuto;
+    let rotationFrom = 0;
+    let rotationTo = 0;
+    let targetStep = 0;
+    let targetRotation = 0;
+    let rotationOffset = 0;
+
+    
+    let fadingPair = null;
+    let fadePairDuration = 1600;
+
+    
+    let isArrowHovered = false;
+
+    function getStepAngle(step) {
+        const stepAngle = (2 * Math.PI) / 5;
+        return rotationOffset + step * stepAngle;
+    }
+
+    function getCurrentStep() {
+        const stepAngle = (2 * Math.PI) / 5;
+        let angle = ((wireframe.rotation.y - rotationOffset) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+        let step = Math.round(angle / stepAngle) % 5;
+        if (step < 0) step += 5;
+        return step;
+    }
+
+    function startFadePair(fromIdx, toIdx) {
+        fadingPair = {
+            from: fromIdx,
+            to: toIdx,
+            start: performance.now(),
+            duration: fadePairDuration
+        };
+        centralMeshes[fromIdx].visible = true;
+        centralMeshes[toIdx].visible = true;
+        centralMeshes[fromIdx].material.opacity = 1;
+        centralMeshes[toIdx].material.opacity = 0;
+    }
+
+    function animateToTargetStep(step, direction = 'shortest') {
+        let fromAngle = animating ? rotationTo : wireframe.rotation.y;
+        let toAngle = getStepAngle(step);
+        let delta;
+
+        if (direction === 'cw') {
+            delta = ((toAngle - fromAngle + 2 * Math.PI) % (2 * Math.PI));
+            if (delta === 0) delta = (2 * Math.PI) / 5;
+        } else if (direction === 'ccw') {
+            delta = ((toAngle - fromAngle - 2 * Math.PI) % (2 * Math.PI));
+            if (delta === 0) delta = -(2 * Math.PI) / 5;
+        } else {
+            delta = ((toAngle - fromAngle + Math.PI) % (2 * Math.PI)) - Math.PI;
+        }
+
+        animating = true;
+        animationStart = performance.now();
+        rotationFrom = fromAngle;
+        rotationTo = fromAngle + delta;
+        targetStep = step;
+        targetRotation = getStepAngle(step);
+
+        let prevStep = getCurrentStep();
+        startFadePair(prevStep, step);
+
+        autoRotate = false;
+        if (pauseTimeout) {
+            clearTimeout(pauseTimeout);
+            pauseTimeout = null;
+        }
+        if (!isArrowHovered) {
+            pauseTimeout = setTimeout(() => {
+                if (!isArrowHovered) {
+                    autoRotate = true;
+                    pauseTimeout = null;
+                }
+            }, 2000);
+        }
+    }
+
+    for (let i = 0; i < 5; i++) {
+        const face = centralFaces[i];
+        const faceGeom = new THREE.BufferGeometry();
+
+        const positions = [];
+        for (const vi of face.verts) {
+            positions.push(
+                geometry.attributes.position.getX(vi),
+                geometry.attributes.position.getY(vi),
+                geometry.attributes.position.getZ(vi)
+            );
+        }
+        faceGeom.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        faceGeom.setIndex([0, 2, 1]);
+        faceGeom.computeVertexNormals();
+
+        const verts = face.verts.map(
+            vi => new THREE.Vector3(
+                geometry.attributes.position.getX(vi),
+                geometry.attributes.position.getY(vi),
+                geometry.attributes.position.getZ(vi)
+            )
+        );
+        let puntaIdx = 0;
+        if (verts[1].y > verts[puntaIdx].y) puntaIdx = 1;
+        if (verts[2].y > verts[puntaIdx].y) puntaIdx = 2;
+        const baseIdx1 = (puntaIdx + 1) % 3;
+        const baseIdx2 = (puntaIdx + 2) % 3;
+        const uvMap = [];
+        uvMap[puntaIdx] = [0.5, 0];
+        uvMap[baseIdx1] = [0, 1];
+        uvMap[baseIdx2] = [1, 1];
+        for (let j = 0; j < 3; j++) {
+            uvMap[j][1] = 1 - uvMap[j][1];
+        }
+        const uvs = new Float32Array([
+            uvMap[0][0], uvMap[0][1],
+            uvMap[1][0], uvMap[1][1],
+            uvMap[2][0], uvMap[2][1]
+        ]);
+        faceGeom.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+
+        const texture = textureLoader.load(imagePaths[i]);
+        const mat = new THREE.MeshBasicMaterial({
+            map: texture,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0
+        });
+
+        const mesh = new THREE.Mesh(faceGeom, mat);
+        scene.add(mesh);
+        centralMeshes.push(mesh);
+    }
+
+    const faceFront = centralFaces[0];
+    const center = faceFront.center.clone().normalize();
+    const angleToZ = Math.atan2(center.x, center.z);
+
+    rotationOffset = -angleToZ;
+    wireframe.rotation.y = rotationOffset;
+    for (const mesh of centralMeshes) {
+        mesh.rotation.y = rotationOffset;
+    }
+    targetRotation = rotationOffset;
+    rotationFrom = targetRotation;
+    rotationTo = targetRotation;
+
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let hoveredFace = null;
+
+    renderer.domElement.addEventListener('mousemove', (event) => {
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+        let found = false;
+        for (let i = 0; i < centralMeshes.length; i++) {
+            const intersects = raycaster.intersectObject(centralMeshes[i]);
+            if (intersects.length > 0) {
+                container.style.cursor = 'pointer';
+                hoveredFace = i;
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            container.style.cursor = 'default';
+            hoveredFace = null;
+        }
+    });
+
+    renderer.domElement.addEventListener('mouseleave', () => {
+        container.style.cursor = 'default';
+        hoveredFace = null;
+    });
+
+    renderer.domElement.addEventListener('click', (event) => {
+        if (hoveredFace !== null) {
+            window.location.href = sectionLinks[hoveredFace];
+        }
+    });
+
+    const arrowLeft = document.getElementById('arrow-left');
+    const arrowRight = document.getElementById('arrow-right');
+
+    function pauseAutoRotateOnInteraction() {
+        isArrowHovered = true;
+        autoRotate = false;
+        if (pauseTimeout) {
+            clearTimeout(pauseTimeout);
+            pauseTimeout = null;
+        }
+    }
+    function resumeAutoRotateAfterDelay() {
+        isArrowHovered = false;
+        if (!animating) {
+            if (pauseTimeout) clearTimeout(pauseTimeout);
+            pauseTimeout = setTimeout(() => {
+                if (!isArrowHovered) {
+                    autoRotate = true;
+                    pauseTimeout = null;
+                }
+            }, 2000);
+        }
+    }
+
+    arrowLeft.addEventListener('mouseenter', pauseAutoRotateOnInteraction);
+    arrowRight.addEventListener('mouseenter', pauseAutoRotateOnInteraction);
+    arrowLeft.addEventListener('mouseleave', resumeAutoRotateAfterDelay);
+    arrowRight.addEventListener('mouseleave', resumeAutoRotateAfterDelay);
+
+    arrowLeft.addEventListener('click', () => {
+        pauseAutoRotateOnInteraction();
+        animationDuration = animationDurationManual;
+        let nextStep = (getCurrentStep() - 1 + 5) % 5;
+        animateToTargetStep(nextStep, 'ccw');
+    });
+    arrowRight.addEventListener('click', () => {
+        pauseAutoRotateOnInteraction();
+        animationDuration = animationDurationManual;
+        let nextStep = (getCurrentStep() + 1) % 5;
+        animateToTargetStep(nextStep, 'cw');
+    });
+
+    function easeInOutCubic(t) {
+        return t < 0.5
+            ? 4 * t * t * t
+            : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    function updateCentralFacesVisibility() {
+        if (fadingPair) {
+            for (let i = 0; i < centralMeshes.length; i++) {
+                centralMeshes[i].visible = (i === fadingPair.from || i === fadingPair.to);
+            }
+        } else {
+            let step = getCurrentStep();
+            for (let i = 0; i < centralMeshes.length; i++) {
+                centralMeshes[i].visible = (i === step);
+                centralMeshes[i].material.opacity = (i === step) ? 1 : 0;
             }
         }
     }
-}
 
-function animateParticles() {
-    ctx.fillStyle = bgColor;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    handleConnections();
-    
-    particlesArray.sort((a, b) => a.size - b.size);
-    particlesArray.forEach(p => p.draw());
-    particlesArray.forEach(p => p.update());
-    
-    requestAnimationFrame(animateParticles);
-}
+    function animate() {
+        requestAnimationFrame(animate);
 
+        if (autoRotate && !animating && !pauseTimeout && !isArrowHovered) {
+            animationDuration = animationDurationAuto;
+            let prevStep = getCurrentStep();
+            let nextStep = (prevStep + 1) % 5;
+            let fromAngle = getStepAngle(prevStep);
+            let toAngle = getStepAngle(nextStep);
 
-function toggleRabbitAnimation() {
-    if (isRabbitRunning) {
-        stopRabbitAnimation();
-    } else {
-        startRabbitAnimation();
-    }
-}
+            let delta = ((toAngle - fromAngle + 2 * Math.PI) % (2 * Math.PI));
+            if (delta === 0) delta = (2 * Math.PI) / 5;
 
-function startRabbitAnimation() {
-    rabbitContainer.style.display = 'block';
-    isRabbitRunning = true;
-    
-    let startTime = null;
-    const duration = 8000;
-    const rabbitWidth = 200;
-    const screenWidth = window.innerWidth;
+            animating = true;
+            animationStart = performance.now();
+            rotationFrom = fromAngle;
+            rotationTo = fromAngle + delta;
+            targetStep = nextStep;
+            targetRotation = getStepAngle(nextStep);
+            startFadePair(prevStep, nextStep);
 
-    function animateRabbit(timestamp) {
-        if (!startTime) startTime = timestamp;
-        const elapsed = timestamp - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        runningRabbit.style.left = `${-rabbitWidth + progress * (screenWidth + rabbitWidth)}px`;
-        
-        if (progress < 1) {
-            rabbitAnimationId = requestAnimationFrame(animateRabbit);
+            autoRotate = false;
+        }
+
+        if (animating) {
+            let now = performance.now();
+            let t = Math.min(1, (now - animationStart) / animationDuration);
+            let eased = easeInOutCubic(t);
+            let currentRotation = rotationFrom + (rotationTo - rotationFrom) * eased;
+            wireframe.rotation.y = currentRotation;
+            for (const mesh of centralMeshes) {
+                mesh.rotation.y = currentRotation;
+            }
+            if (fadingPair) {
+                let tfade = Math.min(1, (now - fadingPair.start) / fadingPair.duration);
+                centralMeshes[fadingPair.from].material.opacity = 1 - tfade;
+                centralMeshes[fadingPair.to].material.opacity = tfade;
+            }
+            if (t >= 1) {
+                animating = false;
+                if (fadingPair) {
+                    centralMeshes[fadingPair.from].material.opacity = 0;
+                    centralMeshes[fadingPair.to].material.opacity = 1;
+                    centralMeshes[fadingPair.from].visible = false;
+                    fadingPair = null;
+                }
+                let finalAngle = getStepAngle(targetStep);
+                wireframe.rotation.y = finalAngle;
+                for (const mesh of centralMeshes) {
+                    mesh.rotation.y = finalAngle;
+                }
+                if (!pauseTimeout && !isArrowHovered) {
+                    pauseTimeout = setTimeout(() => {
+                        if (!isArrowHovered) {
+                            autoRotate = true;
+                            pauseTimeout = null;
+                        }
+                    }, 2000);
+                }
+            }
         } else {
-            startTime = null;
-            runningRabbit.style.left = `${-rabbitWidth}px`;
-            rabbitAnimationId = requestAnimationFrame(animateRabbit);
+            let step = getCurrentStep();
+            let angle = getStepAngle(step);
+            wireframe.rotation.y = angle;
+            for (const mesh of centralMeshes) {
+                mesh.rotation.y = angle;
+            }
         }
-    }
-    
-    rabbitAnimationId = requestAnimationFrame(animateRabbit);
-}
 
-function stopRabbitAnimation() {
-    if (rabbitAnimationId) {
-        cancelAnimationFrame(rabbitAnimationId);
-        rabbitAnimationId = null;
-    }
-    rabbitContainer.style.display = 'none';
-    isRabbitRunning = false;
-}
-
-
-function animateCat() {
-    catPosition += catSpeed;
-    catComputerContainer.style.transform = `translateX(${catPosition}px)`;
-    
-    if (catPosition > window.innerWidth) {
-        catPosition = -catComputerContainer.offsetWidth;
-    }
-    
-    catAnimationId = requestAnimationFrame(animateCat);
-}
-
-function startAudioAndAnimation() {
-    if (!isRadioPlaying) {
-        radioPlayer.src = 'https://radioislanegra.org/listen/rin/stream';
-        radioPlayer.play()
-            .then(() => {
-                isRadioPlaying = true;
-                muteButton.style.display = 'block';
-                muteButton.textContent = '🔊';
-                animateCat();
-            })
-            .catch(e => {
-                console.error("Error al iniciar radio:", e);
-                if (isMobile) setupMobileAudioFallback();
-            });
-    }
-}
-
-
-function stopAudioAndAnimation() {
-    if (isRadioPlaying) {
-        radioPlayer.pause();
-        isRadioPlaying = false;
-        muteButton.style.display = 'none';
-        cancelAnimationFrame(catAnimationId);
-        catAnimationId = null;
-        
-        pauseGifAnimation(catComputerContainer);
-    }
-}
-
-  
-    let isCatAnimationPaused = false;
-    let originalGifSrc = '/images/cat-computer.gif';
-    let staticFrameSrc = '/images/cat-computer.png'; 
-
-    function toggleCatComputer() {
-        const catVisible = window.getComputedStyle(catComputerContainer).display !== 'none';
-        
-        if (!catVisible) {
-            
-            catComputerContainer.style.display = 'block';
-            resumeGifAnimation();
-            startAudioAndAnimation();
-        } else {
-            
-            pauseGifAnimation();
-            stopAudioAndAnimation();
-        }
-    }
-
-    function pauseGifAnimation() {
-        const gifImg = document.getElementById('computer-cat');
-        if (gifImg) {
-            gifImg.src = staticFrameSrc;
-            isCatAnimationPaused = true;
-        }
-    }
-
-    function resumeGifAnimation() {
-        const gifImg = document.getElementById('computer-cat');
-        if (gifImg) {
-            gifImg.src = originalGifSrc;
-            isCatAnimationPaused = false;
-        }
-    }
-
-    function startAudioAndAnimation() {
-        if (!isRadioPlaying) {
-            resumeGifAnimation();
-            radioPlayer.src = 'https://radioislanegra.org/listen/rin/stream';
-            radioPlayer.play()
-                .then(() => {
-                    isRadioPlaying = true;
-                    muteButton.style.display = 'block';
-                    muteButton.textContent = '🔊';
-                    if (!isCatAnimationPaused) {
-                        animateCat();
-                    }
-                })
-                .catch(e => {
-                    console.error("Error al iniciar radio:", e);
-                    if (isMobile) setupMobileAudioFallback();
-                });
-        } else if (isCatAnimationPaused) {
-            
-            resumeGifAnimation();
-            animateCat();
-        }
-    }
-
-    function stopAudioAndAnimation() {
-        if (isRadioPlaying) {
-            radioPlayer.pause();
-            isRadioPlaying = false;
-            muteButton.style.display = 'none';
-            cancelAnimationFrame(catAnimationId);
-            catAnimationId = null;
-        }
-    }
-
-
-function setupMobileAudioFallback() {
-    if (isMobile) {
-        mobilePermissionBtn.style.display = 'block';
-        mobilePermissionBtn.addEventListener('click', () => {
-            radioPlayer.src = 'https://radioislanegra.org/listen/rin/stream';
-            radioPlayer.play()
-                .then(() => {
-                    isRadioPlaying = true;
-                    muteButton.style.display = 'block';
-                    mobilePermissionBtn.style.display = 'none';
-                    muteButton.textContent = '🔊';
-                    animateCat();
-                })
-                .catch(e => {
-                    console.error("Error en móvil:", e);
-                    alert("No se pudo iniciar el audio. Asegúrate de no estar en modo ahorro de datos.");
-                });
-        });
-    }
-}
-
-
-    muteButton.addEventListener('click', () => {
-        radioPlayer.muted = !radioPlayer.muted;
-        muteButton.textContent = radioPlayer.muted ? '🔇' : '🔊';
-        
-        if (radioPlayer.muted) {
-            cancelAnimationFrame(catAnimationId);
-            catAnimationId = null;
-        } else if (isRadioPlaying && !catAnimationId && !isCatAnimationPaused) {
-            animateCat();
-        }
-    });
-
-
-function initThreeJS() {
-    const container = document.getElementById('dome-container');
-    const scene = new THREE.Scene();
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    let camera;
-
-    function setupCamera() {
-        const aspectRatio = window.innerWidth / window.innerHeight;
-        camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 1000);
-        camera.position.z = window.innerWidth < window.innerHeight ? 15 : 10;
-    }
-
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    container.appendChild(renderer.domElement);
-
-    const geometry = new THREE.IcosahedronGeometry(5, 2);
-    const material = new THREE.MeshBasicMaterial({ 
-        color: 0x00ff00,
-        wireframe: true,
-        transparent: true,
-        opacity: 0.7
-    });
-    const dome = new THREE.Mesh(geometry, material);
-    scene.add(dome);
-
-    window.addEventListener('resize', () => {
-        setupCamera();
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    function animateDome() {
-        requestAnimationFrame(animateDome);
-        dome.rotation.x += 0.005;
-        dome.rotation.y += 0.01;
+        updateCentralFacesVisibility();
         renderer.render(scene, camera);
     }
 
-    setupCamera();
-    animateDome();
-}
+    animate();
 
+    
+    function resizeCanvas() {
+        const header = document.querySelector('header');
+        const footer = document.querySelector('footer');
+        const flexContainer = document.getElementById('icosahedron-flex-container');
+        const leftArrow = document.getElementById('arrow-left');
+        const rightArrow = document.getElementById('arrow-right');
+        const container = document.getElementById('icosaedro-container');
 
-window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    if (isRabbitRunning) runningRabbit.style.left = '-200px';
-});
+        const availableHeight = window.innerHeight
+            - (header ? header.offsetHeight : 0)
+            - (footer ? footer.offsetHeight : 0);
 
-document.addEventListener('visibilitychange', () => {
-    if (document.hidden && isRadioPlaying) {
-        radioPlayer.pause();
-        cancelAnimationFrame(catAnimationId);
-        catAnimationId = null;
-    } else if (!document.hidden && isRadioPlaying) {
-        radioPlayer.play().catch(e => console.log("Error al reanudar:", e));
-        if (!catAnimationId) animateCat();
+        flexContainer.style.height = availableHeight + 'px';
+
+        
+        const leftArrowWidth = leftArrow ? leftArrow.offsetWidth + parseFloat(getComputedStyle(leftArrow).marginLeft || 0) : 0;
+        const rightArrowWidth = rightArrow ? rightArrow.offsetWidth + parseFloat(getComputedStyle(rightArrow).marginRight || 0) : 0;
+
+        let availableWidth = flexContainer.clientWidth - leftArrowWidth - rightArrowWidth;
+        if (availableWidth < 200) availableWidth = 200;
+        if (availableHeight < 200) availableHeight = 200;
+
+        
+        container.style.width = availableWidth + 'px';
+        container.style.height = availableHeight + 'px';
+
+        renderer.setSize(availableWidth, availableHeight, false);
+
+        
+        let aspect = availableWidth / availableHeight;
+        camera.left = -frustumSize * aspect / 2;
+        camera.right = frustumSize * aspect / 2;
+        camera.top = frustumSize / 2;
+        camera.bottom = -frustumSize / 2;
+        camera.updateProjectionMatrix();
     }
+    window.addEventListener('resize', resizeCanvas);
+    setTimeout(resizeCanvas, 10);
+    resizeCanvas(); 
 });
+</script>
 
 
-if (isMobile) {
-    radioPlayer.type = 'audio/aac';
-    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-        radioPlayer.autoplay = false;
-        radioPlayer.preload = 'none';
-    }
-}
+    </main>
+    <footer class="footer-custom bg-dark text-white py-4 mt-5">
+  <div class="container">
+    
+    <div class="row">
+      <div class="col-12 text-center">
+        <p class="mb-1">
+          &copy; 2025 DESMONTABLES S.A. - DONDOMO | Manuel Antonio Tocornal #1483, Santiago, Chile
+        </p>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="col-12 text-center">
+        <span>
+          <a href="mailto:info@dondomo.cl" class="text-white text-decoration-none me-2">
+            <i class="bi bi-envelope me-1"></i>info@dondomo.cl
+          </a>
+          &nbsp;
+        
+          <a href="tel:&#43;562227170836" class="text-white text-decoration-none me-2">
+            <i class="bi bi-telephone me-1"></i>&#43;56 2 227170836
+          </a>
+          &nbsp;
 
+                  
+          <a href="https://instagram.com/dondomo" class="text-white ms-2" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
+            <i class="bi bi-instagram" style="font-size:1.3em;vertical-align:middle;"></i>
+          </a>
+          
 
-document.addEventListener('DOMContentLoaded', () => {
-    initCanvas();
-    initThreeJS();
-    rabbitButton.addEventListener('click', toggleRabbitAnimation);
-    rabbitButton.addEventListener('click', toggleCatComputer);
-});
-
-    </script>
-</body>
+               
+          <a href="https://facebook.com/dondomo.cl" class="text-white ms-2" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
+            <i class="bi bi-facebook" style="font-size:1.3em;vertical-align:middle;"></i>
+          </a>
+          
+      
+        </span>
+      </div>
+    </div>
+  </div>
+</footer>
+  </body>
 </html>

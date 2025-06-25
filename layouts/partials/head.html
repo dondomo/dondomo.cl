@@ -1,0 +1,71 @@
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- Título dinámico -->
+  <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} | {{ .Site.Title }}{{ end }}</title>
+  
+  <!-- Descripción (prioriza la de la página, luego la del sitio) -->
+  <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
+  
+  <!-- Favicon (configura esto en tu config.toml) -->
+<!-- Favicon Configuration -->
+<link rel="apple-touch-icon" sizes="180x180" href="{{ "favicon/apple-touch-icon.png" | absURL }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ "favicon/favicon-32x32.png" | absURL }}">
+<link rel="icon" type="image/png" sizes="16x16" href="{{ "favicon/favicon-16x16.png" | absURL }}">
+<link rel="icon" type="image/png" sizes="96x96" href="{{ "favicon/favicon-96x96.png" | absURL }}">
+<link rel="manifest" href="{{ "favicon/site.webmanifest" | absURL }}">
+<link rel="shortcut icon" href="{{ "favicon/favicon.ico" | absURL }}">
+
+<!-- SVG Favicon (modern browsers) -->
+<link rel="icon" href="{{ "favicon/favicon.svg" | absURL }}" type="image/svg+xml">
+
+<!-- Android/Chrome -->
+<link rel="icon" type="image/png" sizes="192x192" href="{{ "favicon/android-chrome-192x192.png" | absURL }}">
+<link rel="icon" type="image/png" sizes="512x512" href="{{ "favicon/android-chrome-512x512.png" | absURL }}">
+
+<!-- Microsoft Configuration -->
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-config" content="{{ "favicon/browserconfig.xml" | absURL }}">
+<meta name="theme-color" content="#ffffff">
+
+<!-- Web App Manifest (PWA) -->
+<link rel="manifest" href="{{ "favicon/site.webmanifest" | absURL }}">
+
+  <!-- OpenGraph / Twitter Cards (para redes sociales) -->
+  <meta property="og:title" content="{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }}{{ end }}">
+  <meta property="og:description" content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
+  <meta property="og:type" content="{{ if .IsPage }}article{{ else }}website{{ end }}">
+  <meta property="og:url" content="{{ .Permalink }}">
+  <meta property="og:image" content="{{ with .Params.image }}{{ . | absURL }}{{ else }}{{ .Site.Params.ogImage | absURL }}{{ end }}">
+
+  <!-- Canonical URL (evita contenido duplicado en SEO) -->
+  <link rel="canonical" href="{{ .Permalink }}">
+
+  <!-- Bootstrap Icons (opcional) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- CSS principal -->
+  {{ $styles := resources.Get "css/main.css" | minify | fingerprint }}
+  <link rel="stylesheet" href="{{ $styles.Permalink }}">
+
+    {{ $footerCSS := resources.Get "css/footer.css" | minify | fingerprint }}
+<link rel="stylesheet" href="{{ $footerCSS.Permalink }}">
+
+
+
+
+
+  <!-- Preload de recursos críticos (mejora performance) -->
+  <link rel="preload" href="{{ $styles.Permalink }}" as="style">
+
+  <!-- Scripts (ej: Alpine.js, HTMX, etc.) -->
+  {{ if .Site.Params.enableAlpineJS }}
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.0/dist/cdn.min.js"></script>
+  {{ end }}
+
+  <!-- RSS Feed (generado automáticamente por Hugo) -->
+  {{ range .AlternativeOutputFormats -}}
+    {{ printf `<link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}
+  {{ end -}}
+</head>

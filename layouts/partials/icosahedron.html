@@ -1,0 +1,517 @@
+{{ $icosahedronCSS := resources.Get "css/icosahedron.css" | minify | fingerprint }}
+<link rel="stylesheet" href="{{ $icosahedronCSS.Permalink }}">
+
+<div id="icosahedron-flex-container">
+  <button id="arrow-left" class="arrow-btn btn btn-dark">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+      <circle cx="24" cy="24" r="23" stroke="#fff" stroke-width="2" fill="rgba(0,0,0,0.5)"/>
+      <polyline points="28,14 18,24 28,34" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  <div id="icosaedro-container"></div>
+  <button id="arrow-right" class="arrow-btn btn btn-dark">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+      <circle cx="24" cy="24" r="23" stroke="#fff" stroke-width="2" fill="rgba(0,0,0,0.5)"/>
+      <polyline points="20,14 30,24 20,34" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Configuración básica ---
+    const container = document.getElementById('icosaedro-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xefefef);
+
+    // --- Cámara ortográfica ---
+    const frustumSize = 3.5;
+    function getAspect() {
+        return container.clientWidth / container.clientHeight;
+    }
+    let aspect = getAspect();
+    let camera = new THREE.OrthographicCamera(
+        -frustumSize * aspect / 2,
+         frustumSize * aspect / 2,
+         frustumSize / 2,
+        -frustumSize / 2,
+        0.1, 1000
+    );
+    camera.position.z = 3;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(renderer.domElement);
+
+    renderer.domElement.style.width = "100%";
+    renderer.domElement.style.height = "100%";
+    renderer.domElement.style.display = "block";
+
+    // Hacer renderer y camera globales para resizeCanvas
+    window.renderer = renderer;
+    window.camera = camera;
+
+    // --- Crear icosaedro ---
+    const geometry = new THREE.IcosahedronGeometry(1, 0);
+
+    if (!geometry.index) {
+        const indices = [];
+        for (let i = 0; i < geometry.attributes.position.count; i++) {
+            indices.push(i);
+        }
+        geometry.setIndex(indices);
+    }
+
+    geometry.computeBoundingBox();
+    const maxY = geometry.boundingBox.max.y;
+    const minY = geometry.boundingBox.min.y;
+    const centerY = (maxY + minY) / 2;
+    geometry.translate(0, -centerY, 0);
+
+    // Alinear el vértice superior con el eje Y
+    let topVertex = null;
+    let minDist = Infinity;
+    for (let i = 0; i < geometry.attributes.position.count; i++) {
+        const x = geometry.attributes.position.getX(i);
+        const y = geometry.attributes.position.getY(i);
+        const z = geometry.attributes.position.getZ(i);
+        const dist = Math.sqrt(x * x + (y - (maxY - centerY)) ** 2 + z * z);
+        if (dist < minDist) {
+            minDist = dist;
+            topVertex = new THREE.Vector3(x, y, z);
+        }
+    }
+    const up = new THREE.Vector3(0, 1, 0);
+    const axis = new THREE.Vector3().crossVectors(topVertex, up).normalize();
+    const angle = topVertex.angleTo(up);
+    geometry.applyMatrix4(new THREE.Matrix4().makeRotationAxis(axis, angle));
+
+    // --- Identificar las 5 caras centrales ---
+    const faceCount = geometry.index.count / 3;
+    const faceCenters = [];
+    for (let i = 0; i < faceCount; i++) {
+        const a = geometry.index.getX(i * 3);
+        const b = geometry.index.getX(i * 3 + 1);
+        const c = geometry.index.getX(i * 3 + 2);
+        const vA = new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, a);
+        const vB = new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, b);
+        const vC = new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, c);
+        const center = new THREE.Vector3().addVectors(vA, vB).add(vC).divideScalar(3);
+        faceCenters.push({ index: i, center, verts: [a, b, c] });
+    }
+    faceCenters.sort((f1, f2) => Math.abs(f1.center.y) - Math.abs(f2.center.y));
+    function isBaseDown(face) {
+        const verts = face.verts.map(
+            vi => new THREE.Vector3(
+                geometry.attributes.position.getX(vi),
+                geometry.attributes.position.getY(vi),
+                geometry.attributes.position.getZ(vi)
+            )
+        );
+        verts.sort((a, b) => b.y - a.y);
+        const sorted = verts.map((v, idx) => ({ v, idx }))
+            .sort((a, b) => b.v.y - a.v.y);
+        return sorted[0].v.y > sorted[1].v.y && sorted[0].v.y > sorted[2].v.y;
+    }
+    const centralFaces = faceCenters
+        .filter(isBaseDown)
+        .slice(0, 5);
+
+    // --- Wireframe para todo el icosaedro ---
+    const wireframe = new THREE.Mesh(
+        geometry,
+        new THREE.MeshBasicMaterial({ color: 0xaa0000, wireframe: true })
+    );
+    scene.add(wireframe);
+
+    // --- Imagen diferente para cada cara central ---
+    const imagePaths = [
+        '/images/menu/somos.webp',
+        '/images/menu/catalogo.webp',
+        '/images/menu/proyectos.webp',
+        '/images/menu/especiales.webp',
+        '/images/menu/contacto.webp',
+    ];
+
+    const sectionLinks = [
+        '/somos/',
+        '/catalogo/',
+        '/projectos/',
+        '/especiales/',
+        '/contacto/'
+    ];
+
+    const textureLoader = new THREE.TextureLoader();
+    const centralMeshes = [];
+
+    // --- VARIABLES GLOBALES PARA ANIMACIÓN ---
+    let autoRotate = true;
+    let pauseTimeout = null;
+    let animating = false;
+    let animationStart = 0;
+    let animationDurationAuto = 1600; // ms
+    let animationDurationManual = 2000; // ms
+    let animationDuration = animationDurationAuto;
+    let rotationFrom = 0;
+    let rotationTo = 0;
+    let targetStep = 0;
+    let targetRotation = 0;
+    let rotationOffset = 0;
+
+    // Variables para transición suave
+    let fadingPair = null;
+    let fadePairDuration = 1600;
+
+    // --- Estado de hover sobre flechas ---
+    let isArrowHovered = false;
+
+    function getStepAngle(step) {
+        const stepAngle = (2 * Math.PI) / 5;
+        return rotationOffset + step * stepAngle;
+    }
+
+    function getCurrentStep() {
+        const stepAngle = (2 * Math.PI) / 5;
+        let angle = ((wireframe.rotation.y - rotationOffset) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+        let step = Math.round(angle / stepAngle) % 5;
+        if (step < 0) step += 5;
+        return step;
+    }
+
+    function startFadePair(fromIdx, toIdx) {
+        fadingPair = {
+            from: fromIdx,
+            to: toIdx,
+            start: performance.now(),
+            duration: fadePairDuration
+        };
+        centralMeshes[fromIdx].visible = true;
+        centralMeshes[toIdx].visible = true;
+        centralMeshes[fromIdx].material.opacity = 1;
+        centralMeshes[toIdx].material.opacity = 0;
+    }
+
+    function animateToTargetStep(step, direction = 'shortest') {
+        let fromAngle = animating ? rotationTo : wireframe.rotation.y;
+        let toAngle = getStepAngle(step);
+        let delta;
+
+        if (direction === 'cw') {
+            delta = ((toAngle - fromAngle + 2 * Math.PI) % (2 * Math.PI));
+            if (delta === 0) delta = (2 * Math.PI) / 5;
+        } else if (direction === 'ccw') {
+            delta = ((toAngle - fromAngle - 2 * Math.PI) % (2 * Math.PI));
+            if (delta === 0) delta = -(2 * Math.PI) / 5;
+        } else {
+            delta = ((toAngle - fromAngle + Math.PI) % (2 * Math.PI)) - Math.PI;
+        }
+
+        animating = true;
+        animationStart = performance.now();
+        rotationFrom = fromAngle;
+        rotationTo = fromAngle + delta;
+        targetStep = step;
+        targetRotation = getStepAngle(step);
+
+        let prevStep = getCurrentStep();
+        startFadePair(prevStep, step);
+
+        autoRotate = false;
+        if (pauseTimeout) {
+            clearTimeout(pauseTimeout);
+            pauseTimeout = null;
+        }
+        if (!isArrowHovered) {
+            pauseTimeout = setTimeout(() => {
+                if (!isArrowHovered) {
+                    autoRotate = true;
+                    pauseTimeout = null;
+                }
+            }, 2000);
+        }
+    }
+
+    for (let i = 0; i < 5; i++) {
+        const face = centralFaces[i];
+        const faceGeom = new THREE.BufferGeometry();
+
+        const positions = [];
+        for (const vi of face.verts) {
+            positions.push(
+                geometry.attributes.position.getX(vi),
+                geometry.attributes.position.getY(vi),
+                geometry.attributes.position.getZ(vi)
+            );
+        }
+        faceGeom.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        faceGeom.setIndex([0, 2, 1]);
+        faceGeom.computeVertexNormals();
+
+        const verts = face.verts.map(
+            vi => new THREE.Vector3(
+                geometry.attributes.position.getX(vi),
+                geometry.attributes.position.getY(vi),
+                geometry.attributes.position.getZ(vi)
+            )
+        );
+        let puntaIdx = 0;
+        if (verts[1].y > verts[puntaIdx].y) puntaIdx = 1;
+        if (verts[2].y > verts[puntaIdx].y) puntaIdx = 2;
+        const baseIdx1 = (puntaIdx + 1) % 3;
+        const baseIdx2 = (puntaIdx + 2) % 3;
+        const uvMap = [];
+        uvMap[puntaIdx] = [0.5, 0];
+        uvMap[baseIdx1] = [0, 1];
+        uvMap[baseIdx2] = [1, 1];
+        for (let j = 0; j < 3; j++) {
+            uvMap[j][1] = 1 - uvMap[j][1];
+        }
+        const uvs = new Float32Array([
+            uvMap[0][0], uvMap[0][1],
+            uvMap[1][0], uvMap[1][1],
+            uvMap[2][0], uvMap[2][1]
+        ]);
+        faceGeom.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+
+        const texture = textureLoader.load(imagePaths[i]);
+        const mat = new THREE.MeshBasicMaterial({
+            map: texture,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0
+        });
+
+        const mesh = new THREE.Mesh(faceGeom, mat);
+        scene.add(mesh);
+        centralMeshes.push(mesh);
+    }
+
+    const faceFront = centralFaces[0];
+    const center = faceFront.center.clone().normalize();
+    const angleToZ = Math.atan2(center.x, center.z);
+
+    rotationOffset = -angleToZ;
+    wireframe.rotation.y = rotationOffset;
+    for (const mesh of centralMeshes) {
+        mesh.rotation.y = rotationOffset;
+    }
+    targetRotation = rotationOffset;
+    rotationFrom = targetRotation;
+    rotationTo = targetRotation;
+
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let hoveredFace = null;
+
+    renderer.domElement.addEventListener('mousemove', (event) => {
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+        let found = false;
+        for (let i = 0; i < centralMeshes.length; i++) {
+            const intersects = raycaster.intersectObject(centralMeshes[i]);
+            if (intersects.length > 0) {
+                container.style.cursor = 'pointer';
+                hoveredFace = i;
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            container.style.cursor = 'default';
+            hoveredFace = null;
+        }
+    });
+
+    renderer.domElement.addEventListener('mouseleave', () => {
+        container.style.cursor = 'default';
+        hoveredFace = null;
+    });
+
+    renderer.domElement.addEventListener('click', (event) => {
+        if (hoveredFace !== null) {
+            window.location.href = sectionLinks[hoveredFace];
+        }
+    });
+
+    const arrowLeft = document.getElementById('arrow-left');
+    const arrowRight = document.getElementById('arrow-right');
+
+    function pauseAutoRotateOnInteraction() {
+        isArrowHovered = true;
+        autoRotate = false;
+        if (pauseTimeout) {
+            clearTimeout(pauseTimeout);
+            pauseTimeout = null;
+        }
+    }
+    function resumeAutoRotateAfterDelay() {
+        isArrowHovered = false;
+        if (!animating) {
+            if (pauseTimeout) clearTimeout(pauseTimeout);
+            pauseTimeout = setTimeout(() => {
+                if (!isArrowHovered) {
+                    autoRotate = true;
+                    pauseTimeout = null;
+                }
+            }, 2000);
+        }
+    }
+
+    arrowLeft.addEventListener('mouseenter', pauseAutoRotateOnInteraction);
+    arrowRight.addEventListener('mouseenter', pauseAutoRotateOnInteraction);
+    arrowLeft.addEventListener('mouseleave', resumeAutoRotateAfterDelay);
+    arrowRight.addEventListener('mouseleave', resumeAutoRotateAfterDelay);
+
+    arrowLeft.addEventListener('click', () => {
+        pauseAutoRotateOnInteraction();
+        animationDuration = animationDurationManual;
+        let nextStep = (getCurrentStep() - 1 + 5) % 5;
+        animateToTargetStep(nextStep, 'ccw');
+    });
+    arrowRight.addEventListener('click', () => {
+        pauseAutoRotateOnInteraction();
+        animationDuration = animationDurationManual;
+        let nextStep = (getCurrentStep() + 1) % 5;
+        animateToTargetStep(nextStep, 'cw');
+    });
+
+    function easeInOutCubic(t) {
+        return t < 0.5
+            ? 4 * t * t * t
+            : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    function updateCentralFacesVisibility() {
+        if (fadingPair) {
+            for (let i = 0; i < centralMeshes.length; i++) {
+                centralMeshes[i].visible = (i === fadingPair.from || i === fadingPair.to);
+            }
+        } else {
+            let step = getCurrentStep();
+            for (let i = 0; i < centralMeshes.length; i++) {
+                centralMeshes[i].visible = (i === step);
+                centralMeshes[i].material.opacity = (i === step) ? 1 : 0;
+            }
+        }
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+
+        if (autoRotate && !animating && !pauseTimeout && !isArrowHovered) {
+            animationDuration = animationDurationAuto;
+            let prevStep = getCurrentStep();
+            let nextStep = (prevStep + 1) % 5;
+            let fromAngle = getStepAngle(prevStep);
+            let toAngle = getStepAngle(nextStep);
+
+            let delta = ((toAngle - fromAngle + 2 * Math.PI) % (2 * Math.PI));
+            if (delta === 0) delta = (2 * Math.PI) / 5;
+
+            animating = true;
+            animationStart = performance.now();
+            rotationFrom = fromAngle;
+            rotationTo = fromAngle + delta;
+            targetStep = nextStep;
+            targetRotation = getStepAngle(nextStep);
+            startFadePair(prevStep, nextStep);
+
+            autoRotate = false;
+        }
+
+        if (animating) {
+            let now = performance.now();
+            let t = Math.min(1, (now - animationStart) / animationDuration);
+            let eased = easeInOutCubic(t);
+            let currentRotation = rotationFrom + (rotationTo - rotationFrom) * eased;
+            wireframe.rotation.y = currentRotation;
+            for (const mesh of centralMeshes) {
+                mesh.rotation.y = currentRotation;
+            }
+            if (fadingPair) {
+                let tfade = Math.min(1, (now - fadingPair.start) / fadingPair.duration);
+                centralMeshes[fadingPair.from].material.opacity = 1 - tfade;
+                centralMeshes[fadingPair.to].material.opacity = tfade;
+            }
+            if (t >= 1) {
+                animating = false;
+                if (fadingPair) {
+                    centralMeshes[fadingPair.from].material.opacity = 0;
+                    centralMeshes[fadingPair.to].material.opacity = 1;
+                    centralMeshes[fadingPair.from].visible = false;
+                    fadingPair = null;
+                }
+                let finalAngle = getStepAngle(targetStep);
+                wireframe.rotation.y = finalAngle;
+                for (const mesh of centralMeshes) {
+                    mesh.rotation.y = finalAngle;
+                }
+                if (!pauseTimeout && !isArrowHovered) {
+                    pauseTimeout = setTimeout(() => {
+                        if (!isArrowHovered) {
+                            autoRotate = true;
+                            pauseTimeout = null;
+                        }
+                    }, 2000);
+                }
+            }
+        } else {
+            let step = getCurrentStep();
+            let angle = getStepAngle(step);
+            wireframe.rotation.y = angle;
+            for (const mesh of centralMeshes) {
+                mesh.rotation.y = angle;
+            }
+        }
+
+        updateCentralFacesVisibility();
+        renderer.render(scene, camera);
+    }
+
+    animate();
+
+    // --- Control de resolución ---
+    function resizeCanvas() {
+        const header = document.querySelector('header');
+        const footer = document.querySelector('footer');
+        const flexContainer = document.getElementById('icosahedron-flex-container');
+        const leftArrow = document.getElementById('arrow-left');
+        const rightArrow = document.getElementById('arrow-right');
+        const container = document.getElementById('icosaedro-container');
+
+        const availableHeight = window.innerHeight
+            - (header ? header.offsetHeight : 0)
+            - (footer ? footer.offsetHeight : 0);
+
+        flexContainer.style.height = availableHeight + 'px';
+
+        // Calcula el ancho real ocupado por las flechas (incluyendo margen)
+        const leftArrowWidth = leftArrow ? leftArrow.offsetWidth + parseFloat(getComputedStyle(leftArrow).marginLeft || 0) : 0;
+        const rightArrowWidth = rightArrow ? rightArrow.offsetWidth + parseFloat(getComputedStyle(rightArrow).marginRight || 0) : 0;
+
+        let availableWidth = flexContainer.clientWidth - leftArrowWidth - rightArrowWidth;
+        if (availableWidth < 200) availableWidth = 200;
+        if (availableHeight < 200) availableHeight = 200;
+
+        // Usa todo el espacio disponible (no cuadrado)
+        container.style.width = availableWidth + 'px';
+        container.style.height = availableHeight + 'px';
+
+        renderer.setSize(availableWidth, availableHeight, false);
+
+        // Ajusta el frustum ortográfico según el aspect ratio real
+        let aspect = availableWidth / availableHeight;
+        camera.left = -frustumSize * aspect / 2;
+        camera.right = frustumSize * aspect / 2;
+        camera.top = frustumSize / 2;
+        camera.bottom = -frustumSize / 2;
+        camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', resizeCanvas);
+    setTimeout(resizeCanvas, 10);
+    resizeCanvas(); // Llama al inicio por si acaso
+});
+</script>
