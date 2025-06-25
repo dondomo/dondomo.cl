@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    {{ partial "head.html" . }}
+    <style>
+        .thank-you {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    {{ partial "header.html" . }}
+
+    <main class="container">
+        <div class="thank-you">
+            <h1>¡Gracias por contactarnos!</h1>
+            <p>Hemos recibido tu mensaje y nos pondremos en contacto contigo pronto.</p>
+            <a href="/" class="button">Volver al inicio</a>
+        </div>
+    </main>
+
+    {{ partial "footer.html" . }}
+</body>
+</html>
