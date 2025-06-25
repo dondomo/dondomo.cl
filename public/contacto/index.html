@@ -208,7 +208,11 @@
     <main class="container">
         <div class="contact-container">
             <div class="contact-form">
-                <form class="contact-form-inner" name="contact" method="POST" netlify>
+                <form name="contact" method="POST" netlify netlify-honeypot="bot-field" action="/gracias/">
+                
+                 <div class="hidden">
+                <label>No llenes este campo si eres humano: <input name="bot-field"></label>
+                </div>
                     <h2>Envíanos un mensaje</h2>
                     <div class="form-group">
                         <label for="name">Nombre</label>
