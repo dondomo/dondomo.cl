@@ -98,7 +98,7 @@
 
   
   
-<link rel="stylesheet" href="https://whimsical-druid-a5c205.netlify.app/css/icosahedron.min.b62a8f8fec5c2dfd5999c1ab02bc7ba7b6c48fa4b7609f2b363632eee609cdb9.css">
+<link rel="stylesheet" href="https://whimsical-druid-a5c205.netlify.app/css/icosahedron.min.5cb3c3abb12c488de6fd62d99ddc9e61da62ba1615bdc065991754637d859da2.css">
 
 <div id="icosahedron-flex-container">
   <button id="arrow-left" class="arrow-btn btn btn-dark">
@@ -608,29 +608,50 @@ document.addEventListener('DOMContentLoaded', () => {
             - (header ? header.offsetHeight : 0)
             - (footer ? footer.offsetHeight : 0);
 
-        flexContainer.style.height = availableHeight + 'px';
-
         
-        const leftArrowWidth = leftArrow ? leftArrow.offsetWidth + parseFloat(getComputedStyle(leftArrow).marginLeft || 0) : 0;
-        const rightArrowWidth = rightArrow ? rightArrow.offsetWidth + parseFloat(getComputedStyle(rightArrow).marginRight || 0) : 0;
+        const isMobile = window.innerWidth <= 700;
 
-        let availableWidth = flexContainer.clientWidth - leftArrowWidth - rightArrowWidth;
-        if (availableWidth < 200) availableWidth = 200;
-        if (availableHeight < 200) availableHeight = 200;
+        if (isMobile) {
+            
+            const size = Math.min(window.innerWidth, availableHeight);
 
-        
-        container.style.width = availableWidth + 'px';
-        container.style.height = availableHeight + 'px';
+            flexContainer.style.height = availableHeight + 'px';
+            container.style.width = size + 'px';
+            container.style.height = size + 'px';
 
-        renderer.setSize(availableWidth, availableHeight, false);
+            renderer.setSize(size, size, false);
 
-        
-        let aspect = availableWidth / availableHeight;
-        camera.left = -frustumSize * aspect / 2;
-        camera.right = frustumSize * aspect / 2;
-        camera.top = frustumSize / 2;
-        camera.bottom = -frustumSize / 2;
-        camera.updateProjectionMatrix();
+            
+            camera.left = -frustumSize / 2;
+            camera.right = frustumSize / 2;
+            camera.top = frustumSize / 2;
+            camera.bottom = -frustumSize / 2;
+            camera.updateProjectionMatrix();
+        } else {
+            
+            flexContainer.style.height = availableHeight + 'px';
+
+            
+            const leftArrowWidth = leftArrow ? leftArrow.offsetWidth + parseFloat(getComputedStyle(leftArrow).marginLeft || 0) : 0;
+            const rightArrowWidth = rightArrow ? rightArrow.offsetWidth + parseFloat(getComputedStyle(rightArrow).marginRight || 0) : 0;
+
+            let availableWidth = flexContainer.clientWidth - leftArrowWidth - rightArrowWidth;
+            if (availableWidth < 200) availableWidth = 200;
+            if (availableHeight < 200) availableHeight = 200;
+
+            container.style.width = availableWidth + 'px';
+            container.style.height = availableHeight + 'px';
+
+            renderer.setSize(availableWidth, availableHeight, false);
+
+            
+            let aspect = availableWidth / availableHeight;
+            camera.left = -frustumSize * aspect / 2;
+            camera.right = frustumSize * aspect / 2;
+            camera.top = frustumSize / 2;
+            camera.bottom = -frustumSize / 2;
+            camera.updateProjectionMatrix();
+        }
     }
     window.addEventListener('resize', resizeCanvas);
     setTimeout(resizeCanvas, 10);

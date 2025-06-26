@@ -509,29 +509,50 @@ document.addEventListener('DOMContentLoaded', () => {
             - (header ? header.offsetHeight : 0)
             - (footer ? footer.offsetHeight : 0);
 
-        flexContainer.style.height = availableHeight + 'px';
+        // --- NUEVO: Detecta móvil ---
+        const isMobile = window.innerWidth <= 700;
 
-        // Calcula el ancho real ocupado por las flechas (incluyendo margen)
-        const leftArrowWidth = leftArrow ? leftArrow.offsetWidth + parseFloat(getComputedStyle(leftArrow).marginLeft || 0) : 0;
-        const rightArrowWidth = rightArrow ? rightArrow.offsetWidth + parseFloat(getComputedStyle(rightArrow).marginRight || 0) : 0;
+        if (isMobile) {
+            // Calcula el tamaño cuadrado máximo que cabe en la pantalla
+            const size = Math.min(window.innerWidth, availableHeight);
 
-        let availableWidth = flexContainer.clientWidth - leftArrowWidth - rightArrowWidth;
-        if (availableWidth < 200) availableWidth = 200;
-        if (availableHeight < 200) availableHeight = 200;
+            flexContainer.style.height = availableHeight + 'px';
+            container.style.width = size + 'px';
+            container.style.height = size + 'px';
 
-        // Usa todo el espacio disponible (no cuadrado)
-        container.style.width = availableWidth + 'px';
-        container.style.height = availableHeight + 'px';
+            renderer.setSize(size, size, false);
 
-        renderer.setSize(availableWidth, availableHeight, false);
+            // Cámara ortográfica cuadrada
+            camera.left = -frustumSize / 2;
+            camera.right = frustumSize / 2;
+            camera.top = frustumSize / 2;
+            camera.bottom = -frustumSize / 2;
+            camera.updateProjectionMatrix();
+        } else {
+            // Desktop: usa todo el espacio disponible (no cuadrado)
+            flexContainer.style.height = availableHeight + 'px';
 
-        // Ajusta el frustum ortográfico según el aspect ratio real
-        let aspect = availableWidth / availableHeight;
-        camera.left = -frustumSize * aspect / 2;
-        camera.right = frustumSize * aspect / 2;
-        camera.top = frustumSize / 2;
-        camera.bottom = -frustumSize / 2;
-        camera.updateProjectionMatrix();
+            // Calcula el ancho real ocupado por las flechas (incluyendo margen)
+            const leftArrowWidth = leftArrow ? leftArrow.offsetWidth + parseFloat(getComputedStyle(leftArrow).marginLeft || 0) : 0;
+            const rightArrowWidth = rightArrow ? rightArrow.offsetWidth + parseFloat(getComputedStyle(rightArrow).marginRight || 0) : 0;
+
+            let availableWidth = flexContainer.clientWidth - leftArrowWidth - rightArrowWidth;
+            if (availableWidth < 200) availableWidth = 200;
+            if (availableHeight < 200) availableHeight = 200;
+
+            container.style.width = availableWidth + 'px';
+            container.style.height = availableHeight + 'px';
+
+            renderer.setSize(availableWidth, availableHeight, false);
+
+            // Ajusta el frustum ortográfico según el aspect ratio real
+            let aspect = availableWidth / availableHeight;
+            camera.left = -frustumSize * aspect / 2;
+            camera.right = frustumSize * aspect / 2;
+            camera.top = frustumSize / 2;
+            camera.bottom = -frustumSize / 2;
+            camera.updateProjectionMatrix();
+        }
     }
     window.addEventListener('resize', resizeCanvas);
     setTimeout(resizeCanvas, 10);
