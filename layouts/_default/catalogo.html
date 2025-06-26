@@ -80,6 +80,12 @@
         </div>
     </div>
 
+    <!-- Modal para imagen ampliada -->
+<div id="imageModal" class="modal" style="display:none;">
+  <span class="modal-close" id="closeModal">&times;</span>
+  <img class="modal-content" id="modalImg" alt="Imagen ampliada">
+</div>
+
      {{ partial "footer.html" . }}
 
 
@@ -98,7 +104,7 @@
         }
         .model-display {
             display: flex;
-            gap: 30px;
+            gap: 60px;
             margin-bottom: 30px;
             align-items: flex-start;
             flex-wrap: wrap;
@@ -166,7 +172,75 @@
             gap: 10px;
             margin-top: 15px;
         }
+
+
+        /* moviles */
+
+@media (max-width: 700px) {
+  .model-display {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  .image-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+  }
+  #modelImage {
+    width: auto;
+    max-width: 100%;
+    display: block;
+    margin: 0 auto;
+  }
+  #modelName {
+    text-align: center;
+    width: 100%;
+    margin: 0;
+  }
+}
   
+
+
+/* Modal de imagen */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  left: 0; top: 0;
+  width: 100vw; height: 100vh;
+  overflow: auto;
+  background: rgba(0,0,0,0.8);
+  justify-content: center;
+  align-items: center;
+}
+.modal-content {
+  display: block;
+  margin: auto;
+  max-width: 90vw;
+  max-height: 80vh;
+  border-radius: 8px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.5);
+}
+.modal-close {
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  color: #fff;
+  font-size: 3rem;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 10000;
+  transition: color 0.2s;
+}
+.modal-close:hover {
+  color: #f22;
+}
     </style>
 
     
@@ -310,6 +384,24 @@
             // Seleccionar el primer modelo al cargar
             changeModel();
         });
+
+
+        // Mostrar imagen ampliada al hacer click
+document.getElementById('modelImage').addEventListener('click', function() {
+  var modal = document.getElementById('imageModal');
+  var modalImg = document.getElementById('modalImg');
+  modal.style.display = "flex";
+  modalImg.src = this.src;
+  modalImg.alt = this.alt;
+});
+
+// Cerrar modal al hacer click en la X o fuera de la imagen
+document.getElementById('closeModal').onclick = function() {
+  document.getElementById('imageModal').style.display = "none";
+};
+document.getElementById('imageModal').onclick = function(e) {
+  if (e.target === this) this.style.display = "none";
+};
     </script>
 
     
