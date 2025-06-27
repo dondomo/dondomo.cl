@@ -1,0 +1,229 @@
+<section class="somos-section">
+  <div class="somos-hero">
+    <div class="hero-background" style="background-image: url('{{ "images/DONDOMO2.webp" | relURL }}');"></div>
+    <h1 class="hero-title">HACEMOS REALIDAD TU PROYECTO <br> SEGÚN TUS NECESIDADES</h1>
+    <div class="hero-content">
+      <div class="content-box">
+        <p>Somos un equipo de profesionales que trabaja en Santiago de Chile desde el año 2000 en el diseño y fabricación de refugios y construcciones ligeras. La investigación, el trabajo de taller y cada nuevo proyecto nos mantienen en constante desarrollo y nos capacitan para enfrentar los encargos explorando y entregando la solución más adecuada. En nuestro taller contamos con operarios calificados y maquinaria para la confección de membranas de PVC/polyester con tecnología de alta frecuencia.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Reset y estilos base */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  /* Estructura principal */
+  .somos-section {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .somos-hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+  }
+
+  /* Imagen de fondo */
+  .hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 0;
+  }
+
+  /* Título ajustado */
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 5rem;
+    color: white;
+    text-align: right;
+    text-transform: uppercase;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8),
+                 -1px -1px 0 rgba(0, 0, 0, 0.3);
+    margin-right: 15vw; /* 10% más a la izquierda */
+    margin-top: 0;
+    position: absolute;
+    
+    right: 0;
+    top: 15vh;
+    transition: top 2.5s cubic-bezier(.77,0,.18,1);
+    width: auto;
+    max-width: 70%;
+    line-height: 1.1;
+    letter-spacing: 3px;
+    z-index: 2;
+  }
+
+  /* Nueva posición final para el título */
+  .hero-title.animated {
+    top: 20vh; /* Baja menos */
+  }
+
+  /* Contenedor de texto que aparece desde abajo */
+  .hero-content {
+    position: absolute;
+    left: 0;
+    right: auto;
+    bottom: 2vh;
+    margin-left: 15vw;   /* igual que el margen derecho del título */
+    margin-right: 0;
+    align-items: flex-start;
+    max-width: 800px;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    transition:
+      bottom 2.5s cubic-bezier(.77,0,.18,1),
+      opacity 2.5s cubic-bezier(.77,0,.18,1);
+  }
+
+  .hero-content.animated {
+    bottom: 18vh;
+    opacity: 1;
+  }
+
+  .content-box {
+    background-color: rgba(50, 50, 50, 0.7);
+    padding: 2.5rem;
+    border-radius: 12px;
+    backdrop-filter: blur(3px);
+    margin-left: 0;
+    margin-right: 0;
+    width: 140%;         /* O el ancho que prefieras */
+    max-width: 1600px;
+    box-sizing: border-box;
+  }
+
+  .content-box p {
+    color: white;
+    font-size: 2.2em;
+    line-height: 1.4;
+    margin: 0;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Animación de deslizamiento desde abajo */
+  @keyframes slideUp {
+    from {
+      bottom: -300px;
+      opacity: 0;
+    }
+    to {
+      bottom: 10vh; /* Posición final sobre el footer */
+      opacity: 1;
+    }
+  }
+
+  /* Nueva animación para el texto */
+  @keyframes slideUpMore {
+    from {
+      bottom: -300px;
+      opacity: 0;
+    }
+    to {
+      bottom: 25vh; /* Más arriba que antes */
+      opacity: 1;
+    }
+  }
+
+  /* Responsive */
+  @media (max-width: 1600px) {
+    .hero-title {
+      font-size: 4.2rem;
+    }
+  }
+
+  @media (max-width: 1200px) {
+    .hero-title {
+      font-size: 3.5rem;
+      margin-right: 3rem;
+      top: 10vh;
+    }
+    
+    .hero-content {
+      right: 3rem;
+      width: calc(100% - 6rem);
+    }
+    
+    .content-box {
+      padding: 2rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .hero-title {
+      font-size: 2.5rem;
+      margin-right: 1.5rem;
+      max-width: 90%;
+      letter-spacing: 2px;
+    }
+    
+    .hero-content {
+      right: 1.5rem;
+      width: calc(100% - 3rem);
+      max-width: none;
+    }
+    
+    .content-box {
+      padding: 1.5rem;
+    }
+    
+    .content-box p {
+      font-size: 1rem;
+    }
+    
+    @keyframes slideUp {
+      to {
+        bottom: 5vh;
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hero-title {
+      font-size: 2rem;
+      margin-right: 1rem;
+    }
+    
+    .content-box {
+      padding: 1.2rem;
+      border-radius: 8px;
+      
+    }
+  }
+
+  .hero-title,
+  .hero-content {
+    transition:
+      top 3.5s cubic-bezier(.77,0,.18,1),
+      bottom 3.5s cubic-bezier(.77,0,.18,1),
+      opacity 3.5s cubic-bezier(.77,0,.18,1);
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Solo animación sincronizada, sin cálculo de ancho dinámico
+  setTimeout(function() {
+    const heroTitle = document.querySelector('.hero-title');
+    const heroContent = document.querySelector('.hero-content');
+    if (heroTitle) heroTitle.classList.add('animated');
+    if (heroContent) heroContent.classList.add('animated');
+  }, 100);
+});
+</script>

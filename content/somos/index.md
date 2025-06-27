@@ -1,5 +1,0 @@
-+++
-date = '2025-06-24T17:16:44-03:00'
-draft = true
-title = 'Somos'
-+++
