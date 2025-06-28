@@ -1,14 +1,26 @@
 <footer class="footer-custom bg-dark text-white py-4 mt-5">
   <div class="container">
-
-        <!-- Primera línea -->
+    <!-- Primera línea -->
     <div class="row">
       <div class="col-12 text-center">
-      <!--   <p class="mb-1">
-          &copy; {{ now.Format "2006" }} {{ .Site.Params.companyName }} 
+        <p class="mb-1">
+          &copy; {{ now.Format "2006" }} {{ .Site.Params.companyName }} | {{ .Site.Params.companyAddress | safeHTML }}
         </p>
-  
- -->
+      </div>
+    </div>
+    <!-- Segunda línea -->
+    <div class="row">
+      <div class="col-12 text-center">
+        <span>
+          <a href="mailto:{{ .Site.Params.companyEmail }}" class="text-white text-decoration-none me-2">
+            <i class="bi bi-envelope me-1"></i>{{ .Site.Params.companyEmail }}
+          </a>
+          &nbsp;
+        
+          <a href="tel:{{ replace .Site.Params.companyPhone " " "" }}" class="text-white text-decoration-none me-2">
+            <i class="bi bi-telephone me-1"></i>{{ .Site.Params.companyPhone }}
+          </a>
+          &nbsp;
 
                   {{ with .Site.Params.instagram }}
           <a href="{{ . }}" class="text-white ms-2" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
@@ -23,8 +35,7 @@
           {{ end }}
       
         </span>
-
-            </div>
+      </div>
     </div>
   </div>
 </footer>

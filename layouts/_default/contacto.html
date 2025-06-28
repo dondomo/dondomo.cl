@@ -3,6 +3,8 @@
 <head>
     {{ partial "head.html" . }}
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700&display=swap');
+
         html, body {
             height: 100%;
         }
@@ -29,6 +31,11 @@
             display: flex;
             flex-direction: column;
         }
+        .contact-form form {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
         .contact-form-inner {
             display: flex;
             flex-direction: column;
@@ -39,9 +46,10 @@
             margin-bottom: 1.5rem;
         }
         .form-group.textarea-group {
-            flex: 1 1 0;
+            flex: 1 1 auto;
             display: flex;
             flex-direction: column;
+            min-height: 0;
         }
         label {
             display: block;
@@ -58,12 +66,11 @@
         }
         textarea {
             flex: 1 1 0;
-            min-height: 80px;
-            max-height: 400px;
-            resize: none;
+            min-height: 120px;
+            resize: vertical;
         }
         button {
-            background-color: #819096;
+            background-color: #525152;
             color: white;
             padding: 0.75rem 1.5rem;
             border: none;
@@ -72,9 +79,15 @@
             font-size: 1rem;
             transition: background-color 0.3s;
             margin-top: 1rem;
+            font-family: 'Montserrat', Arial, sans-serif;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #777;
+            
+        }
+        button[type="submit"] {
+            width: 100%;
+            margin-top: 1rem;
         }
         .contact-right {
             width: 48vw;
@@ -105,6 +118,7 @@
             border-radius: 2px;
             width: 100%;
             box-sizing: border-box;
+            font-family: Montserrat, sans-serif;
         }
 
         .hidden {
@@ -114,6 +128,34 @@
             width: 0;
             overflow: hidden;
         }
+
+body, input, textarea, label, .contact-info, .contact-form, .contact-right {
+    font-family: 'Montserrat', Arial, sans-serif;
+    color: #525152;
+}
+
+h2.title {
+    font-family: 'Bebas Neue', Montserrat, Arial, sans-serif;
+    letter-spacing: 2px;
+    font-size: 2.5rem;
+    color: #525152;
+    padding-top: 0;
+    margin-top: 0.1rem; /* margen superior reducido */
+}
+
+.contact-info a.contact-link {
+    color: #28566e;
+    text-decoration: none;
+    transition: color 0.3s;
+    word-break: break-all;
+}
+.contact-info a.contact-link:hover,
+.contact-info a.contact-link:focus {
+    color: #777; /* igual que el botón enviar en hover */
+    text-decoration: none;
+}
+
+
         @media (max-width: 900px) {
             .contact-container {
                 flex-direction: column;
@@ -124,7 +166,10 @@
             .contact-right {
                 max-width: 100vw;
                 width: 100%;
+                font-family: Montserrat, sans-serif;
             }
+
+       
         }
     </style>
 </head>
@@ -133,13 +178,15 @@
 
     <main class="container">
         <div class="contact-container">
+        
             <div class="contact-form">
+                <h2 class="title">CONTACTANOS</h2>
                 <form name="contact" method="POST" netlify netlify-honeypot="bot-field">
                 <!-- Campo honeypot para protección contra spam -->
                  <div class="hidden">
                 <label>No llenes este campo si eres humano: <input name="bot-field"></label>
                 </div>
-                    <h2>Envíanos un mensaje</h2>
+                    
                     <div class="form-group">
                         <label for="name">Nombre</label>
                         <input type="text" id="name" name="name" required>
@@ -166,8 +213,12 @@
                 <div class="contact-info">
                     <h3>Información de contacto</h3>
                     <p><strong>Dirección:</strong> Manuel Antonio Tocornal 1483, Santiago, Región Metropolitana, Chile</p>
-                    <p><strong>Teléfono:</strong> +56 2 227170836</p>
-                    <p><strong>Email:</strong> info@dondomo.cl</p>
+                    <p><strong>Teléfono:</strong>
+                        <a href="tel:+562227170836" class="contact-link">+56 2 227170836</a>
+                    </p>
+                    <p><strong>Email:</strong>
+                        <a href="mailto:info@dondomo.cl" class="contact-link">info@dondomo.cl</a>
+                    </p>
                     <p><strong>Horario de atención:</strong> Lunes a Viernes de 9:00 a 18:00 hrs</p>
                 </div>
             </div>
@@ -175,5 +226,33 @@
     </main>
 
     {{ partial "footer.html" . }}
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Foco automático en el campo nombre
+    var nameInput = document.getElementById('name');
+    if(nameInput) nameInput.focus();
+
+    // Validación personalizada
+    var form = document.forms['contact'];
+    var errorDiv = document.getElementById('form-error');
+    if(form) {
+        form.addEventListener('submit', function(e) {
+            var nombre = form.name.value.trim();
+            var email = form.email.value.trim();
+            var mensaje = form.message.value.trim();
+            if(!nombre || !email || !mensaje) {
+                e.preventDefault();
+                if(errorDiv) {
+                    errorDiv.style.display = 'block';
+                }
+                // Opcional: scroll al error
+                errorDiv.scrollIntoView({behavior: "smooth", block: "center"});
+            } else {
+                if(errorDiv) errorDiv.style.display = 'none';
+            }
+        });
+    }
+});
+</script>
 </body>
 </html>
