@@ -69,3 +69,7 @@ header .nav-link:hover::after {
     max-height: 50px !important;
   }
 }
+
+
+/* Importar la tipografía Bebas de Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');

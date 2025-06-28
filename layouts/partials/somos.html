@@ -1,8 +1,8 @@
 <section class="somos-section">
   <div class="somos-hero">
     <div class="hero-background" style="background-image: url('{{ "images/DONDOMO2.webp" | relURL }}');"></div>
-    <h1 class="hero-title">HACEMOS REALIDAD TU PROYECTO <br> SEGÚN TUS NECESIDADES</h1>
-    <div class="hero-content">
+    <div class="hero-content-vertical">
+      <h1 class="hero-title">HACEMOS REALIDAD TU PROYECTO SEGÚN TUS NECESIDADES</h1>
       <div class="content-box">
         <p>Somos un equipo de profesionales que trabaja en Santiago de Chile desde el año 2000 en el diseño y fabricación de refugios y construcciones ligeras. La investigación, el trabajo de taller y cada nuevo proyecto nos mantienen en constante desarrollo y nos capacitan para enfrentar los encargos explorando y entregando la solución más adecuada. En nuestro taller contamos con operarios calificados y maquinaria para la confección de membranas de PVC/polyester con tecnología de alta frecuencia.</p>
       </div>
@@ -11,6 +11,10 @@
 </section>
 
 <style>
+
+  /* Importar la tipografía Bebas de Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+
   /* Reset y estilos base */
   * {
     margin: 0;
@@ -19,53 +23,46 @@
   }
   
   /* Estructura principal */
-  .somos-section {
+  .somos-section, .somos-hero {
     position: relative;
-    width: 100%;
-    height: 100vh;
+    width: 100vw;
+    min-height: 100vh;
     overflow: hidden;
   }
 
-  .somos-hero {
-    position: relative;
-    width: 100%;
-    height: 100vh;
-  }
-
-  /* Imagen de fondo */
   .hero-background {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
+    top: 0; left: 0; width: 100%; height: 100%;
     background-size: cover;
     background-position: center;
-    background-repeat: no-repeat;
     z-index: 0;
+  }
+
+  .hero-content-vertical {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 90vh;      /* Menos alto para acercar el título al header */
+    padding: 1vh 0 0 0;    /* Menos padding arriba */
   }
 
   /* Título ajustado */
   .hero-title {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 5rem;
-    color: white;
+    font-size: clamp(2rem, 6vw, 5rem);
+    color: #fff;
     text-align: right;
     text-transform: uppercase;
-    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8),
-                 -1px -1px 0 rgba(0, 0, 0, 0.3);
-    margin-right: 15vw; /* 10% más a la izquierda */
-    margin-top: 0;
-    position: absolute;
-    
-    right: 0;
-    top: 15vh;
-    transition: top 2.5s cubic-bezier(.77,0,.18,1);
-    width: auto;
-    max-width: 70%;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
+    margin: 0;
+    max-width: 95vw;
     line-height: 1.1;
     letter-spacing: 3px;
-    z-index: 2;
+    margin-top: 0;         /* Asegúrate de que no haya margen extra */
+    margin-bottom: 2vh;
   }
 
   /* Nueva posición final para el título */
@@ -98,23 +95,32 @@
   }
 
   .content-box {
-    background-color: rgba(50, 50, 50, 0.7);
-    padding: 2.5rem;
+    background: rgba(50,50,50,0.7);
     border-radius: 12px;
     backdrop-filter: blur(3px);
-    margin-left: 0;
-    margin-right: 0;
-    width: 140%;         /* O el ancho que prefieras */
-    max-width: 1600px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 1700px; /* O el valor que prefieras para desktop */
     box-sizing: border-box;
+    margin: 0 auto;
+    opacity: 0;
+    transform: translateY(60px);
+    transition:
+      opacity 4.5s cubic-bezier(.77,0,.18,1),
+      transform 4.5s cubic-bezier(.77,0,.18,1);
+  }
+
+  .content-box.animated {
+    opacity: 1;
+    transform: none;
   }
 
   .content-box p {
-    color: white;
+    color: #fff;
     font-size: 2.2em;
     line-height: 1.4;
     margin: 0;
-    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
   }
 
   /* Animación de deslizamiento desde abajo */
@@ -218,12 +224,13 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Solo animación sincronizada, sin cálculo de ancho dinámico
   setTimeout(function() {
     const heroTitle = document.querySelector('.hero-title');
     const heroContent = document.querySelector('.hero-content');
+    const contentBox = document.querySelector('.content-box');
     if (heroTitle) heroTitle.classList.add('animated');
     if (heroContent) heroContent.classList.add('animated');
+    if (contentBox) contentBox.classList.add('animated');
   }, 100);
 });
 </script>
