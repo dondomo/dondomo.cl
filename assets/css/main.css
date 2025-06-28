@@ -6,6 +6,21 @@ body {
   line-height: 1.6;
 }
 
+html, body {
+    height: 100%;
+    min-height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main.container {
+    flex: 1 0 auto;
+}
+
 /* Header */
 .navbar {
   background-color: #2c3e50;
