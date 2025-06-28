@@ -62,11 +62,12 @@ header .nav-link:hover::after {
 /* Responsive para móviles */
 @media (max-width: 991.98px) {
   header {
-    padding: 1rem 0 !important;
+    padding: 0.3rem 0 !important;      /* Menos padding arriba y abajo */
   }
   
   header img {
-    max-height: 50px !important;
+    max-height: 30px !important;       /* Más bajo el logo */
+    margin: 0.2em 1em 0.2em 1em !important; /* Menos margen vertical */
   }
 }
 
