@@ -282,29 +282,27 @@ h1, h2 {
   #icosahedron-flex-container {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    position: relative;
+    justify-content: flex-start; /* Cambiado de center a flex-start */
     min-height: auto;
     padding: 0;
     margin: 0;
-    background-color: #efefef; /* Gris del canvas */
+    background-color: #efefef;
+    overflow: hidden;
+    height: auto !important; /* Sobreescribe cualquier altura JS */
   }
   
   #icosaedro-container {
+    margin: 10px auto;
     flex: 0 0 auto;
-    margin: 0 auto;
-  }
-
-
-}
-
-@media (max-width: 700px) {
-  body {
-    overflow-x: hidden;
   }
   
-  footer {
-    position: relative;
-    z-index: 10;
+  body {
+    overflow-x: hidden;
+    padding-bottom: 0 !important;
+  }
+  
+  main {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
   }
 }

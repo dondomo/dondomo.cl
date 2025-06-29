@@ -73,3 +73,13 @@
   display: inline-block; /* Necesario para que funcione transform */
   transform-origin: center;
 }
+
+@media (max-width: 700px) {
+  .footer-custom {
+    position: relative;
+    z-index: 10;
+    margin-top: 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+}

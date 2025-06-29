@@ -566,41 +566,38 @@ if (!fadingPair) {
 
 
         if (isMobile) {
-            // 1. Calcular espacio disponible REAL (viewport - header - footer)
+            const headerHeight = header ? header.offsetHeight : 0;
+            const footerHeight = footer ? footer.offsetHeight : 0;
             const viewportHeight = window.innerHeight;
             const maxContentHeight = viewportHeight - headerHeight - footerHeight;
             
-            // 2. Tamaño cuadrado que cabe en el espacio disponible
+            // Tamaño cuadrado centrado
             const size = Math.min(
-                window.innerWidth * 0.9, // 90% del ancho para márgenes
-                maxContentHeight * 0.9   // 90% de la altura disponible
+                window.innerWidth * 0.9, 
+                maxContentHeight * 0.85 // Deja más espacio para el footer
             );
             
-            // 3. Ajustar contenedor principal
-            flexContainer.style.height = `${maxContentHeight}px`;
-            flexContainer.style.display = 'flex';
-            flexContainer.style.flexDirection = 'column';
-            flexContainer.style.justifyContent = 'center';
-            flexContainer.style.alignItems = 'center';
-            flexContainer.style.padding = '10px 0';
-            flexContainer.style.overflow = 'hidden';
-            flexContainer.style.backgroundColor = '#efefef'; // Igual al canvas
-
-            // 4. Ajustar contenedor del icosaedro
+            // Ajustar contenedor principal
+            flexContainer.style.minHeight = `${maxContentHeight}px`;
+            flexContainer.style.height = 'auto';
+            flexContainer.style.padding = '10px 0 0 0'; // Reducir padding inferior
+            
+            // Ajustar contenedor del icosaedro
             container.style.width = `${size}px`;
             container.style.height = `${size}px`;
-            container.style.margin = '0 auto';
-            container.style.flexShrink = '0'; // Evita que se reduzca
-
-            // 5. Ocultar flechas en móvil (opcional)
-            document.getElementById('arrow-left').style.display = 'none';
-            document.getElementById('arrow-right').style.display = 'none';
-
-            // 6. Ajustar cámara
+            container.style.margin = '0 auto 10px auto'; // Margen inferior reducido
+            
+            // Ajustar cámara
             camera.left = -frustumSize / 2;
             camera.right = frustumSize / 2;
             camera.top = frustumSize / 2;
             camera.bottom = -frustumSize / 2;
+            
+            // Forzar reposicionamiento
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+            }, 100);
+      
             
         } else {
             // Desktop: usa todo el espacio disponible (no cuadrado)
