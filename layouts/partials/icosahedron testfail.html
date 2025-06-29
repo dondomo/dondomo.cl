@@ -564,22 +564,41 @@ if (!fadingPair) {
         // --- NUEVO: Detecta móvil ---
         const isMobile = window.innerWidth <= 700;
 
+
         if (isMobile) {
-            // Calcula el tamaño cuadrado máximo que cabe en la pantalla
-            const size = Math.min(window.innerWidth, availableHeight);
-
-            flexContainer.style.height = availableHeight + 'px';
-            container.style.width = size + 'px';
-            container.style.height = size + 'px';
-
-            renderer.setSize(size, size, false);
-
-            // Cámara ortográfica cuadrada
+            const headerHeight = header ? header.offsetHeight : 0;
+            const footerHeight = footer ? footer.offsetHeight : 0;
+            const viewportHeight = window.innerHeight;
+            const maxContentHeight = viewportHeight - headerHeight - footerHeight;
+            
+            // Tamaño cuadrado centrado
+            const size = Math.min(
+                window.innerWidth * 0.9, 
+                maxContentHeight * 0.85 // Deja más espacio para el footer
+            );
+            
+            // Ajustar contenedor principal
+            flexContainer.style.minHeight = `${maxContentHeight}px`;
+            flexContainer.style.height = 'auto';
+            flexContainer.style.padding = '10px 0 0 0'; // Reducir padding inferior
+            
+            // Ajustar contenedor del icosaedro
+            container.style.width = `${size}px`;
+            container.style.height = `${size}px`;
+            container.style.margin = '0 auto 10px auto'; // Margen inferior reducido
+            
+            // Ajustar cámara
             camera.left = -frustumSize / 2;
             camera.right = frustumSize / 2;
             camera.top = frustumSize / 2;
             camera.bottom = -frustumSize / 2;
-            camera.updateProjectionMatrix();
+            
+            // Forzar reposicionamiento
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+            }, 100);
+      
+            
         } else {
             // Desktop: usa todo el espacio disponible (no cuadrado)
             flexContainer.style.height = availableHeight + 'px';
@@ -605,6 +624,7 @@ if (!fadingPair) {
             camera.bottom = -frustumSize / 2;
             camera.updateProjectionMatrix();
         }
+        camera.updateProjectionMatrix();
     }
     window.addEventListener('resize', resizeCanvas);
     setTimeout(resizeCanvas, 10);

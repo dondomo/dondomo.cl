@@ -668,41 +668,22 @@ if (!fadingPair) {
         
         const isMobile = window.innerWidth <= 700;
 
-
         if (isMobile) {
-            const headerHeight = header ? header.offsetHeight : 0;
-            const footerHeight = footer ? footer.offsetHeight : 0;
-            const viewportHeight = window.innerHeight;
-            const maxContentHeight = viewportHeight - headerHeight - footerHeight;
             
-            
-            const size = Math.min(
-                window.innerWidth * 0.9, 
-                maxContentHeight * 0.85 
-            );
-            
-            
-            flexContainer.style.minHeight = `${maxContentHeight}px`;
-            flexContainer.style.height = 'auto';
-            flexContainer.style.padding = '10px 0 0 0'; 
-            
-            
-            container.style.width = `${size}px`;
-            container.style.height = `${size}px`;
-            container.style.margin = '0 auto 10px auto'; 
-            
+            const size = Math.min(window.innerWidth, availableHeight);
+
+            flexContainer.style.height = availableHeight + 'px';
+            container.style.width = size + 'px';
+            container.style.height = size + 'px';
+
+            renderer.setSize(size, size, false);
+
             
             camera.left = -frustumSize / 2;
             camera.right = frustumSize / 2;
             camera.top = frustumSize / 2;
             camera.bottom = -frustumSize / 2;
-            
-            
-            setTimeout(() => {
-                window.scrollTo(0, 0);
-            }, 100);
-      
-            
+            camera.updateProjectionMatrix();
         } else {
             
             flexContainer.style.height = availableHeight + 'px';
@@ -728,7 +709,6 @@ if (!fadingPair) {
             camera.bottom = -frustumSize / 2;
             camera.updateProjectionMatrix();
         }
-        camera.updateProjectionMatrix();
     }
     window.addEventListener('resize', resizeCanvas);
     setTimeout(resizeCanvas, 10);
