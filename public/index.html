@@ -50,7 +50,7 @@
 
   
   
-  <link rel="stylesheet" href="https://whimsical-druid-a5c205.netlify.app/css/main.min.9fca255e6f3b92e64553dabb62cb4b6dc4b566f156190fc20f9b1b83867bb6e8.css">
+  <link rel="stylesheet" href="https://whimsical-druid-a5c205.netlify.app/css/main.min.1637f559221069e3b0a27c8f381f17cad1f83ee0a8693095ef2d2a8eba3a8b04.css">
 
     
 <link rel="stylesheet" href="https://whimsical-druid-a5c205.netlify.app/css/footer.min.92b9f2b4ba87fd67f0cc7f55c1b5980cc3f97dbc94998936cddd2d2aecab71de.css">
@@ -65,7 +65,7 @@
 
 
   
-  <link rel="preload" href="https://whimsical-druid-a5c205.netlify.app/css/main.min.9fca255e6f3b92e64553dabb62cb4b6dc4b566f156190fc20f9b1b83867bb6e8.css" as="style">
+  <link rel="preload" href="https://whimsical-druid-a5c205.netlify.app/css/main.min.1637f559221069e3b0a27c8f381f17cad1f83ee0a8693095ef2d2a8eba3a8b04.css" as="style">
 
   
   
@@ -668,20 +668,38 @@ if (!fadingPair) {
         
         const isMobile = window.innerWidth <= 700;
 
+
         if (isMobile) {
             
-            const maxVisibleHeight = window.innerHeight - headerHeight - footerHeight;
+            const viewportHeight = window.innerHeight;
+            const maxContentHeight = viewportHeight - headerHeight - footerHeight;
             
             
-            const size = Math.min(window.innerWidth, maxVisibleHeight);
+            const size = Math.min(
+                window.innerWidth * 0.9, 
+                maxContentHeight * 0.9   
+            );
             
             
-            flexContainer.style.height = `${maxVisibleHeight}px`;
-            flexContainer.style.padding = '0';
+            flexContainer.style.height = `${maxContentHeight}px`;
+            flexContainer.style.display = 'flex';
+            flexContainer.style.flexDirection = 'column';
+            flexContainer.style.justifyContent = 'center';
+            flexContainer.style.alignItems = 'center';
+            flexContainer.style.padding = '10px 0';
+            flexContainer.style.overflow = 'hidden';
+            flexContainer.style.backgroundColor = '#efefef'; 
+
+            
             container.style.width = `${size}px`;
             container.style.height = `${size}px`;
             container.style.margin = '0 auto';
+            container.style.flexShrink = '0'; 
+
             
+            document.getElementById('arrow-left').style.display = 'none';
+            document.getElementById('arrow-right').style.display = 'none';
+
             
             camera.left = -frustumSize / 2;
             camera.right = frustumSize / 2;

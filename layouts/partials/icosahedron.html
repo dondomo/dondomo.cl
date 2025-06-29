@@ -564,21 +564,39 @@ if (!fadingPair) {
         // --- NUEVO: Detecta móvil ---
         const isMobile = window.innerWidth <= 700;
 
+
         if (isMobile) {
-            // Altura máxima disponible sin hacer scroll
-            const maxVisibleHeight = window.innerHeight - headerHeight - footerHeight;
+            // 1. Calcular espacio disponible REAL (viewport - header - footer)
+            const viewportHeight = window.innerHeight;
+            const maxContentHeight = viewportHeight - headerHeight - footerHeight;
             
-            // Tamaño cuadrado que cabe en la pantalla visible
-            const size = Math.min(window.innerWidth, maxVisibleHeight);
+            // 2. Tamaño cuadrado que cabe en el espacio disponible
+            const size = Math.min(
+                window.innerWidth * 0.9, // 90% del ancho para márgenes
+                maxContentHeight * 0.9   // 90% de la altura disponible
+            );
             
-            // Ajustar contenedores
-            flexContainer.style.height = `${maxVisibleHeight}px`;
-            flexContainer.style.padding = '0';
+            // 3. Ajustar contenedor principal
+            flexContainer.style.height = `${maxContentHeight}px`;
+            flexContainer.style.display = 'flex';
+            flexContainer.style.flexDirection = 'column';
+            flexContainer.style.justifyContent = 'center';
+            flexContainer.style.alignItems = 'center';
+            flexContainer.style.padding = '10px 0';
+            flexContainer.style.overflow = 'hidden';
+            flexContainer.style.backgroundColor = '#efefef'; // Igual al canvas
+
+            // 4. Ajustar contenedor del icosaedro
             container.style.width = `${size}px`;
             container.style.height = `${size}px`;
             container.style.margin = '0 auto';
-            
-            // Ajustar cámara
+            container.style.flexShrink = '0'; // Evita que se reduzca
+
+            // 5. Ocultar flechas en móvil (opcional)
+            document.getElementById('arrow-left').style.display = 'none';
+            document.getElementById('arrow-right').style.display = 'none';
+
+            // 6. Ajustar cámara
             camera.left = -frustumSize / 2;
             camera.right = frustumSize / 2;
             camera.top = frustumSize / 2;
