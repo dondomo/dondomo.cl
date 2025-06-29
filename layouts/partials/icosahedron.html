@@ -176,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let targetStep = 0;
     let targetRotation = 0;
     let rotationOffset = 0;
+    let isCentralHovered = false;
 
     // Variables para transición suave
     let fadingPair = null;
@@ -183,6 +184,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Estado de hover sobre flechas ---
     let isArrowHovered = false;
+
+    // Agrega esto fuera de animate()
+    let wasHoveringCentral = false;
 
     function getStepAngle(step) {
         const stepAngle = (2 * Math.PI) / 5;
@@ -362,7 +366,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const arrowRight = document.getElementById('arrow-right');
 
         function pauseAutoRotateOnInteraction() {
-            isArrowHovered = true;
             autoRotate = false;
             if (pauseTimeout) {
                 clearTimeout(pauseTimeout);
@@ -382,11 +385,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        arrowLeft.addEventListener('mouseenter', pauseAutoRotateOnInteraction);
-        arrowRight.addEventListener('mouseenter', pauseAutoRotateOnInteraction);
-        arrowLeft.addEventListener('mouseleave', resumeAutoRotateAfterDelay);
-        arrowRight.addEventListener('mouseleave', resumeAutoRotateAfterDelay);
-
+        arrowLeft.addEventListener('mouseenter', () => {
+            isArrowHovered = true;
+            pauseAutoRotateOnInteraction();
+        });
+        arrowRight.addEventListener('mouseenter', () => {
+            isArrowHovered = true;
+            pauseAutoRotateOnInteraction();
+        });
+        arrowLeft.addEventListener('mouseleave', () => {
+            isArrowHovered = false;
+            resumeAutoRotateAfterDelay();
+        });
+        arrowRight.addEventListener('mouseleave', () => {
+            isArrowHovered = false;
+            resumeAutoRotateAfterDelay();
+        });
         arrowLeft.addEventListener('click', () => {
             pauseAutoRotateOnInteraction();
             animationDuration = animationDurationManual;
@@ -488,6 +502,44 @@ document.addEventListener('DOMContentLoaded', () => {
                     mesh.rotation.y = angle;
                 }
             }
+
+            
+
+            // Detecta si el mouse está sobre alguna cara central
+            let hoveringCentral = hoveredFace !== null;
+
+            // Actualiza el estado de hover central
+            isCentralHovered = hoveringCentral;
+
+            // Pausa animación al entrar en hover central
+            if (isCentralHovered && !isArrowHovered) {
+                pauseAutoRotateOnInteraction();
+            }
+
+            // Reanuda animación inmediatamente al salir del hover central
+            if (wasHoveringCentral && !isCentralHovered && !isArrowHovered && !animating) {
+                autoRotate = true;
+                if (pauseTimeout) {
+                    clearTimeout(pauseTimeout);
+                    pauseTimeout = null;
+                }
+            }
+
+            wasHoveringCentral = isCentralHovered;
+
+// --- Efecto de hover sobre caras centrales, solo si NO hay transición ---
+if (!fadingPair) {
+    let step = getCurrentStep();
+    for (let i = 0; i < centralMeshes.length; i++) {
+        if (i === step && hoveredFace === i) {
+            // Efecto hover: aclara la cara visible
+            centralMeshes[i].material.color.set(0xefa0a0); // blanco (aclara)
+        } else {
+            // Normal: color original
+            centralMeshes[i].material.color.set(0xffffff); // o el color base de tu textura
+        }
+    }
+}
 
             updateCentralFacesVisibility();
             renderer.render(scene, camera);

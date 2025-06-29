@@ -39,15 +39,11 @@
   transition: color 0.2s;
 }
 
-.footer-custom a:hover {
-  color: #777;
-  text-decoration: none;
-}
 
 .footer-custom .bi {
   font-size: 1.1em;
   vertical-align: middle;
-  margin-right: 0.3rem;
+  margin-right: 1rem;
 }
 
 .footer-custom .bi-instagram {
@@ -64,4 +60,16 @@
     padding-left: 0.5rem;
     padding-right: 0.5rem;
   }
+}
+
+/* Efecto hover para los íconos */
+.footer-custom a:hover .bi {
+  transform: scale(1.2); /* Aumenta tamaño en 20% */
+  transition: transform 0.3s ease; /* Suaviza la animación */
+}
+
+/* Asegura que los íconos tengan transform-origin centrado */
+.footer-custom .bi {
+  display: inline-block; /* Necesario para que funcione transform */
+  transform-origin: center;
 }

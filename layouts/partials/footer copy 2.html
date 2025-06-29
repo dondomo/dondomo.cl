@@ -1,0 +1,36 @@
+<footer class="footer-custom bg-dark text-white py-4 mt-5">
+  <div class="container">
+
+        <!-- Primera línea -->
+    <div class="row">
+      <div class="col-12 text-center">
+      <!--   <p class="mb-1">
+          &copy; {{ now.Format "2006" }} {{ .Site.Params.companyName }} 
+        </p>
+  
+ -->
+
+                  {{ with .Site.Params.instagram }}
+          <a href="{{ . }}" class="text-white ms-2" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
+            <i class="bi bi-instagram" style="font-size:1.3em;vertical-align:middle;"></i>
+          </a>
+          {{ end }}
+
+               {{ with .Site.Params.facebook }}
+          <a href="{{ . }}" class="text-white ms-2" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
+            <i class="bi bi-facebook" style="font-size:1.3em;vertical-align:middle;"></i>
+          </a>
+          {{ end }}
+
+          {{ with .Site.Params.email }}
+          <a href="{{ . }}" class="text-white ms-2" aria-label="Email" target="_blank" rel="noopener noreferrer">
+            <i class="bi bi-email" style="font-size:1.3em;vertical-align:middle;"></i>
+          </a>
+          {{ end }}
+      
+        </span>
+
+            </div>
+    </div>
+  </div>
+</footer>
