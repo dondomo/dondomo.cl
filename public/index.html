@@ -50,7 +50,7 @@
 
   
   
-  <link rel="stylesheet" href="https://whimsical-druid-a5c205.netlify.app/css/main.min.33e593146b8948a3c09492b2ec83d9dc643e05dbe414c69a3e83e70ce8d05db0.css">
+  <link rel="stylesheet" href="https://whimsical-druid-a5c205.netlify.app/css/main.min.9fca255e6f3b92e64553dabb62cb4b6dc4b566f156190fc20f9b1b83867bb6e8.css">
 
     
 <link rel="stylesheet" href="https://whimsical-druid-a5c205.netlify.app/css/footer.min.92b9f2b4ba87fd67f0cc7f55c1b5980cc3f97dbc94998936cddd2d2aecab71de.css">
@@ -65,7 +65,7 @@
 
 
   
-  <link rel="preload" href="https://whimsical-druid-a5c205.netlify.app/css/main.min.33e593146b8948a3c09492b2ec83d9dc643e05dbe414c69a3e83e70ce8d05db0.css" as="style">
+  <link rel="preload" href="https://whimsical-druid-a5c205.netlify.app/css/main.min.9fca255e6f3b92e64553dabb62cb4b6dc4b566f156190fc20f9b1b83867bb6e8.css" as="style">
 
   
   
@@ -670,20 +670,24 @@ if (!fadingPair) {
 
         if (isMobile) {
             
-            const size = Math.min(window.innerWidth, availableHeight);
-
-            flexContainer.style.height = availableHeight + 'px';
-            container.style.width = size + 'px';
-            container.style.height = size + 'px';
-
-            renderer.setSize(size, size, false);
-
+            const maxVisibleHeight = window.innerHeight - headerHeight - footerHeight;
+            
+            
+            const size = Math.min(window.innerWidth, maxVisibleHeight);
+            
+            
+            flexContainer.style.height = `${maxVisibleHeight}px`;
+            flexContainer.style.padding = '0';
+            container.style.width = `${size}px`;
+            container.style.height = `${size}px`;
+            container.style.margin = '0 auto';
+            
             
             camera.left = -frustumSize / 2;
             camera.right = frustumSize / 2;
             camera.top = frustumSize / 2;
             camera.bottom = -frustumSize / 2;
-            camera.updateProjectionMatrix();
+            
         } else {
             
             flexContainer.style.height = availableHeight + 'px';
@@ -709,6 +713,7 @@ if (!fadingPair) {
             camera.bottom = -frustumSize / 2;
             camera.updateProjectionMatrix();
         }
+        camera.updateProjectionMatrix();
     }
     window.addEventListener('resize', resizeCanvas);
     setTimeout(resizeCanvas, 10);
