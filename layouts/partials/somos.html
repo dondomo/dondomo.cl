@@ -49,9 +49,6 @@
     padding: 0.2vh 0 0 0;    /* Menos padding arriba */
   }
 
-  p {
-    font-family: 'Montserrat', sans-serif;
-  }
 
   /* Título ajustado */
   .hero-title {
@@ -103,7 +100,7 @@
     border-radius: 12px;
     backdrop-filter: blur(3px);
     padding: 2rem;
-    width: 90%;
+    width: 50%;
     max-width: 1700px; /* O el valor que prefieras para desktop */
     box-sizing: border-box;
     margin: 0 auto;
@@ -120,8 +117,9 @@
   }
 
   .content-box p {
+    font-family: 'Montserrat', sans-serif;
     color: #fff;
-    font-size: 2.2em;
+    font-size: 2.1 em;
     line-height: 1.4;
     margin: 0;
     text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
@@ -160,9 +158,9 @@
 
   @media (max-width: 1200px) {
     .hero-title {
-      font-size: 3.5rem;
+      font-size: 2.5rem;
       margin-right: 3rem;
-      top: 10vh;
+      top: 0;
     }
     
     .hero-content {
@@ -172,6 +170,7 @@
     
     .content-box {
       padding: 2rem;
+      width: 90%;
     }
   }
 
