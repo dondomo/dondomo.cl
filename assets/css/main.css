@@ -280,17 +280,12 @@ h1, h2 {
 
 @media (max-width: 700px) {
   #icosahedron-flex-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: calc(100vh - (height-of-header + height-of-footer));
-    padding: 0;
-    margin: 0;
-    background-color: #efefef; /* Gris del canvas */
+    background-color: #EFEFEF; /* Mismo color que el footer */
+    margin-bottom: 0;
+    padding-bottom: 0;
   }
   
   #icosaedro-container {
-    flex: 0 0 auto;
-    margin: 0 auto;
+    margin-bottom: 0;
   }
 }
