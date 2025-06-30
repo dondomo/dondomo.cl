@@ -2,21 +2,21 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://whimsical-druid-a5c205.netlify.app/</loc>
+    <loc>http://localhost:1313/</loc>
     <lastmod>2025-06-25T14:32:54-03:00</lastmod>
   </url><url>
-    <loc>https://whimsical-druid-a5c205.netlify.app/gracias/</loc>
+    <loc>http://localhost:1313/gracias/</loc>
     <lastmod>2025-06-25T14:32:54-03:00</lastmod>
   </url><url>
-    <loc>https://whimsical-druid-a5c205.netlify.app/contacto/</loc>
+    <loc>http://localhost:1313/contacto/</loc>
     <lastmod>2025-06-24T17:16:34-03:00</lastmod>
   </url><url>
-    <loc>https://whimsical-druid-a5c205.netlify.app/catalogo/</loc>
+    <loc>http://localhost:1313/catalogo/</loc>
   </url><url>
-    <loc>https://whimsical-druid-a5c205.netlify.app/categories/</loc>
+    <loc>http://localhost:1313/categories/</loc>
   </url><url>
-    <loc>https://whimsical-druid-a5c205.netlify.app/somos/</loc>
+    <loc>http://localhost:1313/somos/</loc>
   </url><url>
-    <loc>https://whimsical-druid-a5c205.netlify.app/tags/</loc>
+    <loc>http://localhost:1313/tags/</loc>
   </url>
 </urlset>
